@@ -27,7 +27,6 @@ ThreadPool::ThreadPool(size_t num_threads) : is_running(true) {
 }
 
 ThreadPool::~ThreadPool() {
-    //destroy somethings?
     is_running = false;
     free_flag.notify_all(); // notify / wake all threads
     for (size_t i = 0; i < threads.size(); i++) {
