@@ -35,7 +35,7 @@ void draw(const Ball& ball) {
         for (int j = 0; j < WIDTH; ++j) {
         	if (i == 0 || i == HEIGHT - 1 || j == 0 || j == WIDTH - 1) {
         		if ((j == 0 || j == WIDTH - 1) && (i != 0 && i != HEIGHT -1)) {
-        			std::cout << "|";
+        			std::cout << "+";
         		} else {
         			std::cout << "=";
         		}  
@@ -61,7 +61,7 @@ void dvd_draw(Stack &stack) {
     while (true) {
         draw(*ball);
         update(*ball);
-        std::this_thread::sleep_for(std::chrono::milliseconds(80));
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
     }
 }
 
@@ -102,6 +102,8 @@ int main() {
 	//build_tuples(stack);
 	test_dynamic();
 	test_custom(stack);
-	//dvd_draw(stack);
+	std::cout << "press enter key to continue..." << std::endl;
+	std::cin.get();
+	dvd_draw(stack);
 	return 0;
 }
