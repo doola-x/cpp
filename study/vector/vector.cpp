@@ -11,10 +11,10 @@ public:
     }
 
     Vector(const Vector& other) {
-        printf("copied!\n");
+        printf("copied ctor\n");
         count = other.count; // copy count
         heap_capacity = other.heap_capacity; // copy heap capacity
-        for (int i = 0; i < std::min(count, Capacity); i++) { // stack may hold <= capacity, need only init obj
+        for (size_t i = 0; i < std::min(count, Capacity); i++) { // stack may hold <= capacity, need only init obj
             stack[i] = other.stack[i]; // move stack memory from other object to this
         }
         if (heap_capacity > 0) {
@@ -26,13 +26,28 @@ public:
         }
     }
 
-    Vector& operator=(Vector& other) {
-        printf("copied!\n");
+    Vector(Vector&& other) noexcept {
+        printf("move ctor\n");
+        count = other.count;
+        heap_capacity = other.heap_capacity;
+        for (size_t i = 0; i < std::min(count, Capacity); i++) {
+            stack[i] = std::move(other.stack[i]);
+        }
+        new_heap = other.new_heap;
+
+        other.count = 0;
+        other.heap_capacity = 0;
+        other.new_heap = nullptr;
+    }
+
+    Vector& operator=(const Vector& other) {
+        printf("copied assign\n");
         if (this == &other) return *this;
+        delete[] new_heap;
 
         count = other.count;
         heap_capacity = other.heap_capacity;
-        for (int i = 0; i < std::min(count, Capacity); i++) {
+        for (size_t i = 0; i < std::min(count, Capacity); i++) {
             stack[i] = other.stack[i];
         }
         
@@ -42,6 +57,25 @@ public:
         } else {
             new_heap = nullptr;
         }
+
+        return *this;
+    }
+
+    Vector& operator=(Vector&& other) {
+        printf("move assign\n");
+        if (this == &other) return *this;
+
+        delete[] new_heap;
+        count = other.count;
+        heap_capacity = other.heap_capacity;
+        for (size_t i = 0; i < std::min(count, Capacity); i++) {
+            stack[i] = std::move(other.stack[i]);
+        }
+        new_heap = other.new_heap;
+
+        other.count = 0;
+        other.heap_capacity = 0;
+        other.new_heap = nullptr;
 
         return *this;
     }
@@ -78,10 +112,16 @@ public:
     }
 
     void pop_back() {
+        if (count == 0) throw;
+        if (count > Capacity) {
+            new_heap[count - Capacity - 1].~T();
+        } else {
+            stack[count - 1].~T();
+        }
         count--;
     }
 
-    size_t size() {
+    size_t size() const {
         return count;
     }
 private:
@@ -98,7 +138,9 @@ int main() {
     }
     Vector<int, 2> v0(v);
     v.push_back(11);
-    v0 = v;
+    v0 = std::move(v);
+    v = std::move(v0);
+
     for (int i = 0; i < v.size(); i++) {
         std::cout << v[i] << std::endl;
     }
@@ -110,11 +152,9 @@ int main() {
     v1.push_back("hello");
     v1.push_back(", world");
     v1.push_back("!");
-
     for (int i = 0; i < v1.size(); i++) {
         std::cout << v1[i];
     }
-    v1[3] = "test";
     std::cout << std::endl;
     return 0;
 }
