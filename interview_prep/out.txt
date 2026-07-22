@@ -1,0 +1,23 @@
+=== Q3: Logger Rate Limiter ===
+  PASS [t=1 foo first time]
+  PASS [t=2 bar first time]
+  PASS [t=3 foo only 2s elapsed]
+  PASS [t=8 bar only 6s elapsed]
+  PASS [t=10 foo only 9s elapsed]
+  PASS [t=11 foo 10s elapsed ok]
+  PASS [exactly 10s allowed]
+  PASS [9s not allowed]
+  PASS [a still blocked at t=5]
+  PASS [b still blocked at t=5]
+  PASS [a allowed at t=10]
+  PASS [b allowed at t=10]
+  PASS [first occurrence at t=100]
+  PASS [first occurrence at t=0]
+  PASS [spam t=0 prints]
+  PASS [spam t=1 blocked]
+  PASS [spam t=9 still blocked]
+  PASS [spam t=10 prints again]
+  PASS [spam t=19 blocked]
+  PASS [spam t=20 prints again]
+
+Result: 20 passed, 0 failed

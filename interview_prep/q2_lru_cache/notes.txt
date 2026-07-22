@@ -1,0 +1,1 @@
+this one i had to cheat pretty heavily on, i had some decent pseudo code that circled the answer, but i was unaware of how i could use iterator in a map. also i still have no idea what the magic .splice() fn is doing, i have a feeling its masking a lot of a magic here that makes this solution work

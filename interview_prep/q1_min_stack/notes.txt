@@ -1,0 +1,1 @@
+i was able to come pretty close to the solution, i was confused because i didn't know top just meant "most recent insert", and not "max value insert". so i was thinking i missed something but landed on the min value side by side as a pair eventually

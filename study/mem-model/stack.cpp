@@ -1,7 +1,6 @@
 #include <new>
 #include <cstddef>
 #include <cstring>
-#include <stdexcept>
 
 class Stack {
 	static constexpr std::size_t STACK_SIZE = 2048;
