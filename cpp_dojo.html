@@ -1,0 +1,2374 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>c++ dojo — learn what the machine does</title>
+<style>:root{
+  --bg:#0d1014; --bg2:#13171d; --bg3:#1a2028; --line:#262e39; --line2:#33404f;
+  --tx:#d9dee6; --tx2:#9aa5b4; --tx3:#6b7684;
+  --amb:#f0b23e; --amb2:#f0b23e22; --teal:#5ec8b8; --teal2:#5ec8b81f;
+  --red:#ff6b6b; --red2:#ff6b6b1f; --vio:#a99cff; --vio2:#a99cff1f; --blu:#6cb2ff;
+  --mono:ui-monospace,"SF Mono","JetBrains Mono","Cascadia Code",Menlo,Consolas,monospace;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.6 var(--sans)}
+a{color:var(--teal);text-decoration:none} a:hover{text-decoration:underline}
+button{font:inherit;cursor:pointer}
+code,.mono{font-family:var(--mono);font-size:.9em}
+p code,li code,td code,.inl code{background:var(--bg3);padding:.08em .35em;border-radius:4px;color:#e9d7a8}
+::selection{background:var(--amb);color:#000}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:18px;padding:10px 22px;background:#0d1014ee;backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.brand{font-family:var(--mono);font-weight:700;letter-spacing:-.02em;color:var(--tx);font-size:15px}
+.brand b{color:var(--amb)}
+.top nav{display:flex;gap:4px;margin-left:auto}
+.top nav a{font-family:var(--mono);font-size:13px;color:var(--tx2);padding:6px 10px;border-radius:6px}
+.top nav a:hover,.top nav a.on{background:var(--bg3);color:var(--tx);text-decoration:none}
+.pill{display:inline-block;min-width:18px;padding:0 6px;margin-left:4px;border-radius:9px;background:var(--amb);color:#000;font-size:11px;font-weight:700;text-align:center}
+.pill.z{background:var(--line2);color:var(--tx2)}
+
+main{max-width:880px;margin:0 auto;padding:34px 22px 120px}
+.wide{max-width:1100px}
+h1,h2,h3{font-family:var(--serif);font-weight:600;letter-spacing:-.01em;line-height:1.2}
+h1{font-size:40px;margin:.2em 0 .3em}
+h2{font-size:26px;margin:1.6em 0 .5em}
+h3{font-size:19px;margin:1.2em 0 .4em}
+.kicker{font-family:var(--mono);font-size:12px;text-transform:lowercase;letter-spacing:.08em;color:var(--amb)}
+.muted{color:var(--tx2)} .dim{color:var(--tx3)}
+.small{font-size:13px}
+
+/* home */
+.hero{padding:20px 0 10px}
+.hero p{font-family:var(--serif);font-size:20px;color:var(--tx2);max-width:640px}
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin:22px 0}
+.stat{flex:1;min-width:140px;background:var(--bg2);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.stat .n{font-family:var(--mono);font-size:26px;font-weight:700}
+.stat .l{font-size:12px;color:var(--tx3);font-family:var(--mono)}
+.cta{display:flex;gap:10px;flex-wrap:wrap;margin:8px 0 30px}
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line2);background:var(--bg3);color:var(--tx);padding:9px 16px;border-radius:8px;font-size:14px;font-family:var(--mono)}
+.btn:hover{border-color:var(--tx3);text-decoration:none}
+.btn.pri{background:var(--amb);border-color:var(--amb);color:#111;font-weight:700}
+.btn.pri:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.sm{padding:5px 10px;font-size:12px}
+.tracks{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px}
+.track{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:18px 18px 12px}
+.track h3{margin:2px 0 4px;font-size:21px}
+.track .desc{font-size:14px;color:var(--tx2);margin-bottom:10px}
+.track ol{list-style:none;margin:0;padding:0}
+.track li a{display:flex;align-items:center;gap:10px;padding:7px 8px;margin:0 -8px;border-radius:7px;color:var(--tx);font-size:15px}
+.track li a:hover{background:var(--bg3);text-decoration:none}
+.dot{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--tx3);flex:none}
+.dot.p{border-color:var(--amb);background:linear-gradient(90deg,var(--amb) 50%,transparent 50%)}
+.dot.d{border-color:var(--teal);background:var(--teal)}
+.track li .w{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--tx3)}
+.bar{height:4px;background:var(--line);border-radius:2px;overflow:hidden;margin:10px 0 4px}
+.bar i{display:block;height:100%;background:var(--teal)}
+
+/* lesson */
+.lhead .src{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0}
+.chip{font-family:var(--mono);font-size:11px;padding:3px 8px;border-radius:5px;background:var(--bg3);color:var(--tx2);border:1px solid var(--line)}
+.hook{margin:26px 0 8px;padding:18px 20px;border-left:3px solid var(--amb);background:linear-gradient(90deg,var(--amb2),transparent);font-family:var(--serif);font-size:21px;line-height:1.45}
+.prog{position:fixed;left:0;top:0;height:2px;background:var(--amb);z-index:30;transition:width .3s}
+.beat{animation:rise .35s ease both;margin:22px 0}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.beat p{margin:.6em 0}
+.beat ul{padding-left:1.2em} .beat li{margin:.3em 0}
+.callout{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--bg2)}
+.callout.edge{border-color:#ff6b6b55;background:var(--red2)}
+.callout.edge::before{content:"edge case // you weren't thinking about this";display:block;font-family:var(--mono);font-size:11px;color:var(--red);margin-bottom:6px;letter-spacing:.04em}
+.callout.rule{border-color:#5ec8b855;background:var(--teal2)}
+.callout.rule::before{content:"rule of thumb";display:block;font-family:var(--mono);font-size:11px;color:var(--teal);margin-bottom:6px;letter-spacing:.04em}
+.continue{display:flex;justify-content:center;margin:30px 0}
+.continue .btn{padding:11px 26px}
+.kbd{font-family:var(--mono);font-size:11px;color:var(--tx3);margin-left:8px}
+
+pre.code{position:relative;margin:12px 0;background:#0a0d11;border:1px solid var(--line);border-radius:9px;padding:14px 16px;overflow-x:auto;font:13.5px/1.55 var(--mono);color:#cfd6e0}
+pre.code .cap{position:absolute;top:6px;right:10px;font-size:10px;color:var(--tx3);text-transform:lowercase}
+.k{color:#c79bff}.s{color:#9fd78a}.c{color:#5d6b7a;font-style:italic}.n{color:#f5a97f}.pp{color:#f07f9a}.t{color:#6cc6ff}.f{color:#f2d47a}
+.ln{display:block;padding:0 6px;margin:0 -6px;border-radius:3px}
+.ln.hi{background:#f0b23e26;box-shadow:inset 2px 0 var(--amb)}
+
+/* quiz */
+.q{border:1px solid var(--line2);border-radius:12px;background:var(--bg2);padding:16px 18px}
+.q .qh{font-family:var(--mono);font-size:11px;color:var(--vio);letter-spacing:.06em;margin-bottom:6px}
+.q .qt{font-size:17px;margin:4px 0 10px}
+.opts{display:grid;gap:8px}
+.opt{display:flex;gap:10px;align-items:flex-start;text-align:left;background:var(--bg3);border:1px solid var(--line);color:var(--tx);padding:10px 12px;border-radius:8px;font-size:15px}
+.opt:hover:not(:disabled){border-color:var(--tx3)}
+.opt .ix{font-family:var(--mono);font-size:12px;color:var(--tx3);padding-top:2px}
+.opt code{font-size:13.5px}
+.opt.ok{border-color:var(--teal);background:var(--teal2)}
+.opt.bad{border-color:var(--red);background:var(--red2)}
+.opt:disabled{cursor:default}
+.why{margin-top:12px;padding:12px 14px;border-radius:8px;background:var(--bg);border:1px dashed var(--line2);font-size:15px}
+.why .v{font-family:var(--mono);font-weight:700;margin-right:6px}
+.why .v.ok{color:var(--teal)} .why .v.bad{color:var(--red)}
+textarea,input[type=text],input[type=number],select{font:14px var(--mono);background:var(--bg);color:var(--tx);border:1px solid var(--line2);border-radius:7px;padding:8px 10px}
+textarea{width:100%;min-height:84px;resize:vertical}
+.recall .qh{color:var(--amb)}
+.grades{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+/* widget frame */
+.wg{border:1px solid var(--line2);border-radius:12px;background:var(--bg2);overflow:hidden}
+.wg .wt{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:12px;color:var(--teal);background:#0f1318}
+.wg .wt::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--teal);box-shadow:0 0 8px var(--teal)}
+.wg .wb{padding:16px}
+.wg .hint{font-size:13px;color:var(--tx2);margin:0 0 12px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.col2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:700px){.col2{grid-template-columns:1fr} h1{font-size:30px}}
+.tog{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-family:var(--mono);background:var(--bg3);border:1px solid var(--line);padding:5px 10px;border-radius:6px;cursor:pointer;user-select:none;color:var(--tx2)}
+.tog input{accent-color:var(--amb)}
+.tog.on{border-color:var(--amb);color:var(--tx)}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:7px;overflow:hidden}
+.seg button{background:var(--bg3);color:var(--tx2);border:0;padding:6px 11px;font:12px var(--mono);border-right:1px solid var(--line)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--amb);color:#111;font-weight:700}
+.out{font-family:var(--mono);font-size:13px;background:#0a0d11;border:1px solid var(--line);border-radius:8px;padding:10px 12px;white-space:pre-wrap;min-height:40px}
+.big{font-family:var(--mono);font-size:24px;font-weight:700}
+.lab{font-family:var(--mono);font-size:11px;color:var(--tx3)}
+table.t{border-collapse:collapse;width:100%;font-size:13px;font-family:var(--mono)}
+table.t th,table.t td{border:1px solid var(--line);padding:6px 8px;text-align:left}
+table.t th{background:var(--bg3);color:var(--tx2);font-weight:500}
+.good{color:var(--teal)} .badc{color:var(--red)} .warn{color:var(--amb)}
+.bytes{display:grid;grid-template-columns:repeat(8,1fr);gap:3px;font-family:var(--mono);font-size:10px}
+.by{height:30px;border-radius:3px;display:flex;align-items:center;justify-content:center;overflow:hidden;white-space:nowrap;color:#111;font-weight:600}
+.by.pad{background:repeating-linear-gradient(45deg,#2a1d1d,#2a1d1d 4px,#3a2323 4px,#3a2323 8px);color:var(--red)}
+.mem{display:flex;flex-direction:column;gap:6px}
+.mitem{display:flex;align-items:center;gap:8px;background:var(--bg3);border:1px solid var(--line);border-radius:6px;padding:4px 8px;font-family:var(--mono);font-size:13px}
+.mitem .sw{width:12px;height:12px;border-radius:3px}
+.mitem .sp{margin-left:auto;display:flex;gap:2px}
+.mitem button{background:none;border:0;color:var(--tx3);padding:0 5px;font-size:14px}
+.mitem button:hover{color:var(--tx)}
+.log{font-family:var(--mono);font-size:13px;background:#0a0d11;border:1px solid var(--line);border-radius:8px;padding:8px 12px;min-height:120px;max-height:260px;overflow:auto}
+.log div{animation:rise .25s ease both}
+.cell{display:inline-flex;align-items:center;justify-content:center;width:44px;height:38px;margin:2px;border-radius:5px;font-family:var(--mono);font-size:12px;background:var(--bg3);border:1px solid var(--line)}
+.cell.f{background:#5ec8b833;border-color:var(--teal)}
+.cell.cap{border-style:dashed}
+.flash{animation:flash .6s ease}
+@keyframes flash{0%{background:var(--amb)}100%{}}
+.thr{border:1px solid var(--line);border-radius:9px;padding:10px;background:#0a0d11}
+.thr h4{margin:0 0 6px;font-family:var(--mono);font-size:12px;color:var(--tx2);font-weight:500;display:flex;justify-content:space-between}
+.ins{font-family:var(--mono);font-size:13px;padding:2px 6px;border-radius:4px;color:var(--tx3)}
+.ins.cur{background:#f0b23e26;color:var(--tx);box-shadow:inset 2px 0 var(--amb)}
+.ins.done{color:var(--tx3);text-decoration:line-through}
+.ins.blk{background:var(--red2);color:var(--red);box-shadow:inset 2px 0 var(--red)}
+.banner{padding:10px 14px;border-radius:8px;font-family:var(--mono);font-size:13px;margin-top:10px}
+.banner.bad{background:var(--red2);border:1px solid #ff6b6b66;color:#ffb3b3}
+.banner.ok{background:var(--teal2);border:1px solid #5ec8b866;color:#b8efe6}
+.banner.info{background:var(--vio2);border:1px solid #a99cff55;color:#d6d0ff}
+input[type=range]{accent-color:var(--amb);width:100%}
+
+/* review */
+.card{border:1px solid var(--line2);background:var(--bg2);border-radius:14px;padding:28px;min-height:220px}
+.card .front{font-family:var(--serif);font-size:23px;line-height:1.4}
+.card .back{margin-top:18px;padding-top:18px;border-top:1px dashed var(--line2);font-size:16px}
+.foot{margin-top:60px;padding-top:20px;border-top:1px solid var(--line);font-size:13px;color:var(--tx3)}
+.toc{columns:2;column-gap:28px} .toc li{break-inside:avoid}
+.fin{border:1px solid #5ec8b855;background:var(--teal2);border-radius:12px;padding:18px 20px;margin-top:30px}
+</style></head>
+<body>
+<div id="prog" class="prog"></div>
+<header class="top"><a class="brand" href="#map">c++<b>::</b>dojo</a>
+<nav><a href="#map">map</a><a href="#review">review<span id="duepill" class="pill z">0</span></a><a href="#mix">drill</a><a href="#index">index</a></nav></header>
+<div id="app"></div>
+<script>
+"use strict";
+/* ---------- tiny helpers ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function h(tag, attrs = {}, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") e.className = v;
+    else if (k === "html") e.innerHTML = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else if (v !== false && v != null) e.setAttribute(k, v === true ? "" : v);
+  }
+  for (const k of kids.flat()) if (k != null && k !== false) e.append(k.nodeType ? k : document.createTextNode(k));
+  return e;
+}
+const C = String.raw;
+const DAY = 864e5;
+
+/* ---------- c++ highlighter ---------- */
+const KW = new Set(("alignas alignof auto bool break case catch char char8_t class concept const consteval constexpr constinit const_cast continue co_await co_return co_yield decltype default delete do double dynamic_cast else enum explicit export extern false float for friend goto if inline int long mutable namespace new noexcept nullptr operator private protected public reinterpret_cast requires return short signed sizeof static static_assert static_cast struct switch template this thread_local throw true try typedef typeid typename union unsigned using virtual void volatile while override final").split(" "));
+const TY = new Set(("std size_t string vector map unordered_map list deque array optional variant any unique_ptr shared_ptr weak_ptr thread mutex atomic lock_guard scoped_lock unique_lock condition_variable future promise async move forward int8_t uint8_t int32_t uint64_t string_view function boost T U Args").split(" "));
+function hl(src) {
+  const re = /(\/\/[^\n]*|\/\*[\s\S]*?\*\/)|("(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])')|(^[ \t]*#[a-z]+)|(\b\d[\d.']*(?:[uUlLfF]|ms|s)*\b)|([A-Za-z_]\w*)/gm;
+  let out = "", last = 0, m;
+  while ((m = re.exec(src))) {
+    out += esc(src.slice(last, m.index));
+    const tok = esc(m[0]);
+    if (m[1]) out += `<span class="c">${tok}</span>`;
+    else if (m[2]) out += `<span class="s">${tok}</span>`;
+    else if (m[3]) out += `<span class="pp">${tok}</span>`;
+    else if (m[4]) out += `<span class="n">${tok}</span>`;
+    else if (KW.has(m[0])) out += `<span class="k">${tok}</span>`;
+    else if (TY.has(m[0])) out += `<span class="t">${tok}</span>`;
+    else if (src[re.lastIndex] === "(") out += `<span class="f">${tok}</span>`;
+    else out += tok;
+    last = re.lastIndex;
+  }
+  return out + esc(src.slice(last));
+}
+function codeBlock(src, cap, hiLines) {
+  const lines = hl(src.replace(/^\n/, "").replace(/\s+$/, "")).split("\n");
+  const pre = h("pre", { class: "code" });
+  pre.innerHTML = (cap ? `<span class="cap">${esc(cap)}</span>` : "") +
+    lines.map((l, i) => `<span class="ln${hiLines && hiLines.includes(i + 1) ? " hi" : ""}" data-l="${i + 1}">${l || " "}</span>`).join("");
+  return pre;
+}
+/* inline markdown-ish: `code`, **bold**, *em* */
+function md(s) {
+  return String(s).split(/(`[^`]+`)/).map(p => (p.length > 1 && p[0] === "`" && p.endsWith("`")) ? `<code>${esc(p.slice(1, -1))}</code>` :
+    esc(p).replace(/\*\*([^*]+)\*\*/g, "<b>$1</b>").replace(/(^|[^*\w])\*([^*\s][^*]*?)\*/g, "$1<em>$2</em>").replace(/\n/g, "<br>")).join("");
+}
+
+/* ---------- persistence (try/catch: storage may be unavailable) ---------- */
+const KEY = "cpp-dojo-v1";
+const S = (() => {
+  let d = null;
+  try { d = JSON.parse(localStorage.getItem(KEY)); } catch (e) { }
+  d = d || {};
+  return Object.assign({ done: {}, beat: {}, ans: {}, cards: {}, stats: { n: 0, ok: 0 }, days: [] }, d);
+})();
+function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { } }
+function touchDay() {
+  const t = new Date().toISOString().slice(0, 10);
+  if (!S.days.includes(t)) { S.days.push(t); S.days = S.days.slice(-400); save(); }
+}
+function streak() {
+  let n = 0, d = new Date();
+  for (; ;) {
+    const t = d.toISOString().slice(0, 10);
+    if (S.days.includes(t)) { n++; d = new Date(d - DAY); }
+    else if (n === 0 && t === new Date().toISOString().slice(0, 10)) { d = new Date(d - DAY); }
+    else break;
+  }
+  return n;
+}
+
+/* ---------- content registry ---------- */
+const TRACKS = [];   // {id,title,desc,lessons:[]}
+const LESSONS = {};  // id -> lesson
+const ORDER = [];
+function track(t) { t.lessons = []; TRACKS.push(t); }
+function lesson(L) {
+  const t = TRACKS[TRACKS.length - 1];
+  L.track = t.id; L.trackTitle = t.title;
+  t.lessons.push(L); LESSONS[L.id] = L; ORDER.push(L.id);
+}
+const WIDGETS = {};
+
+/* ---------- spaced repetition (leitner-ish) ---------- */
+const BOX = [0, 1, 2, 4, 8, 16, 35, 75, 150];
+function allCards() {
+  const r = [];
+  for (const id of ORDER) LESSONS[id].cards.forEach((c, i) => r.push({ key: id + ":" + i, lid: id, q: c[0], a: c[1] }));
+  return r;
+}
+function enroll(lid) {
+  LESSONS[lid].cards.forEach((c, i) => { const k = lid + ":" + i; if (!S.cards[k]) S.cards[k] = { box: 0, due: Date.now() + 6 * 3600e3 }; });
+}
+function dueCards() { const now = Date.now(); return allCards().filter(c => S.cards[c.key] && S.cards[c.key].due <= now); }
+function grade(key, g) {
+  const c = S.cards[key]; if (!c) return;
+  if (g === 0) { c.box = 0; c.due = Date.now() + 10 * 60e3; }
+  else if (g === 1) { c.box = Math.max(1, c.box); c.due = Date.now() + Math.max(1, BOX[c.box] / 2) * DAY; }
+  else { c.box = Math.min(BOX.length - 1, c.box + (g === 3 ? 2 : 1)); c.due = Date.now() + BOX[c.box] * DAY; }
+  touchDay(); save();
+}
+
+/* ---------- routing ---------- */
+const app = () => $("#app");
+function go(hash) { location.hash = hash; }
+window.addEventListener("hashchange", route);
+function route() {
+  const hsh = location.hash.slice(1);
+  $$(".top nav a").forEach(x => x.classList.toggle("on", x.getAttribute("href") === "#" + (hsh || "map")));
+  updatePill();
+  window.scrollTo(0, 0);
+  $("#prog").style.width = "0";
+  if (hsh.startsWith("l-") && LESSONS[hsh.slice(2)]) return viewLesson(LESSONS[hsh.slice(2)]);
+  if (hsh === "review") return viewReview();
+  if (hsh === "mix") return viewMix();
+  if (hsh === "index") return viewIndex();
+  return viewHome();
+}
+function updatePill() {
+  const n = dueCards().length;
+  const p = $("#duepill"); p.textContent = n; p.className = "pill" + (n ? "" : " z");
+}
+
+/* ---------- home ---------- */
+function lessonState(id) {
+  if (S.done[id]) return "d";
+  return S.beat[id] ? "p" : "";
+}
+function nextLesson() { return ORDER.find(id => !S.done[id]) || ORDER[0]; }
+function viewHome() {
+  const done = ORDER.filter(id => S.done[id]).length;
+  const acc = S.stats.n ? Math.round(100 * S.stats.ok / S.stats.n) + "%" : "—";
+  const due = dueCards().length;
+  const nx = LESSONS[nextLesson()];
+  const root = h("main", { class: "wide" },
+    h("div", { class: "hero" },
+      h("div", { class: "kicker" }, "// a dojo built from ten c++ books"),
+      h("h1", {}, "you know the syntax. now learn what the machine does with it."),
+      h("p", {}, "no walls of text. each lesson is a hook, a small idea, a thing to poke, and questions that punish wrong mental models. finish a lesson and its key facts enter a spaced-repetition deck. come back tomorrow. that's the whole trick.")),
+    h("div", { class: "stats" },
+      stat(done + "/" + ORDER.length, "lessons cleared"),
+      stat(due, "cards due now"),
+      stat(acc, "drill accuracy"),
+      stat(streak() + "d", "streak")),
+    h("div", { class: "cta" },
+      h("a", { class: "btn pri", href: "#l-" + nx.id }, (S.beat[nx.id] ? "resume → " : "start → ") + nx.title),
+      h("a", { class: "btn", href: "#review" }, `review deck (${due})`),
+      h("a", { class: "btn", href: "#mix" }, "interleaved drill ×10")),
+    h("div", { class: "tracks" }, TRACKS.map(t => {
+      const dn = t.lessons.filter(L => S.done[L.id]).length;
+      return h("div", { class: "track" },
+        h("div", { class: "kicker" }, t.id),
+        h("h3", {}, t.title),
+        h("div", { class: "desc" }, t.desc),
+        h("div", { class: "bar" }, h("i", { style: `width:${100 * dn / t.lessons.length}%` })),
+        h("ol", {}, t.lessons.map(L => h("li", {}, h("a", { href: "#l-" + L.id },
+          h("span", { class: "dot " + lessonState(L.id) }), L.title, h("span", { class: "w" }, L.widgetLabel || ""))))));
+    })),
+    h("div", { class: "foot" }, "progress lives in this browser only (localStorage). sources: c++ standard library (josuttis) · c++ concurrency in action · c++ high performance · boost c++ libraries · c++: the core language · c++ template metaprogramming (abrahams/gurtovoy) · advanced c++ metaprogramming (di gennaro) · inside the c++ object model · effective modern c++ · modern c++ design. all explanations and examples here are original; chips on each lesson point you to the chapter for the long version. sizes/layouts assume a typical 64-bit itanium-abi target (gcc/clang on linux) unless stated."));
+  app().replaceChildren(root);
+}
+function stat(n, l) { return h("div", { class: "stat" }, h("div", { class: "n" }, String(n)), h("div", { class: "l" }, l)); }
+
+/* ---------- index ---------- */
+function viewIndex() {
+  app().replaceChildren(h("main", {},
+    h("div", { class: "kicker" }, "// everything"), h("h1", {}, "index"),
+    ...TRACKS.map(t => h("div", {}, h("h2", {}, t.title),
+      h("ol", {}, t.lessons.map(L => h("li", {}, h("a", { href: "#l-" + L.id }, L.title), " ",
+        h("span", { class: "dim small" }, "— " + L.src.join(" · "))))))),
+    h("h2", {}, "all cards"),
+    h("p", { class: "muted" }, "the full deck, for when you want to cram. (cramming is worse than spacing. you know this.)"),
+    h("ol", {}, allCards().map(c => h("li", { class: "small inl", html: `<b>${md((c.q))}</b><br><span class="muted">${md((c.a))}</span>` })))));
+}
+
+/* ---------- lesson view: gated beats ---------- */
+function chunkEnd(beats, from) {
+  // reveal consecutive passive beats, stop after the first interactive one
+  let i = from;
+  while (i < beats.length) {
+    const t = beats[i].t;
+    i++;
+    if (t === "q" || t === "w" || t === "recall") break;
+  }
+  return i;
+}
+function viewLesson(L) {
+  touchDay();
+  const idx = ORDER.indexOf(L.id);
+  const main = h("main", {});
+  main.append(h("div", { class: "lhead" },
+    h("div", { class: "kicker" }, `${L.track} · lesson ${idx + 1}/${ORDER.length}`),
+    h("h1", {}, L.title),
+    h("div", { class: "src" }, L.src.map(s => h("span", { class: "chip" }, s)))),
+    h("div", { class: "hook", html: md(L.hook) }));
+  const body = h("div", {});
+  const ctl = h("div", { class: "continue" });
+  main.append(body, ctl);
+  app().replaceChildren(main);
+
+  let shown = Math.min(S.beat[L.id] || chunkEnd(L.beats, 0), L.beats.length);
+  const pending = new Set(); // q beats awaiting answer
+  function setProg() { $("#prog").style.width = (100 * shown / L.beats.length) + "%"; }
+  function renderUpTo(n, from = 0) {
+    for (let i = from; i < n; i++) body.append(renderBeat(L, i, () => { pending.delete(i); refreshCtl(); }, pending));
+    shown = n; S.beat[L.id] = n; save(); setProg(); refreshCtl();
+  }
+  function refreshCtl() {
+    ctl.replaceChildren();
+    if (shown < L.beats.length) {
+      const b = h("button", { class: "btn pri", onclick: step }, "continue", h("span", { class: "kbd" }, "␣"));
+      if (pending.size) { b.disabled = true; b.firstChild.textContent = "answer first"; }
+      ctl.append(b);
+    } else finishPanel();
+  }
+  function step() {
+    if (pending.size) return;
+    const n = chunkEnd(L.beats, shown);
+    const first = body.children.length;
+    renderUpTo(n, shown);
+    const el = body.children[first];
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+  function finishPanel() {
+    const next = ORDER[idx + 1];
+    const was = S.done[L.id];
+    const panel = h("div", { class: "fin" },
+      h("h3", { style: "margin-top:0" }, was ? "cleared ✓" : "lock it in"),
+      h("p", { class: "muted" }, was ? `the ${L.cards.length} cards from this lesson are in your deck.` :
+        `marking this done adds ${L.cards.length} cards to your review deck. first review in ~6h, then spacing grows each time you nail it.`),
+      h("div", { class: "row" },
+        was ? null : h("button", { class: "btn pri", onclick: () => { S.done[L.id] = Date.now(); enroll(L.id); save(); updatePill(); finishPanel(); } }, "mark cleared + enroll cards"),
+        next ? h("a", { class: "btn", href: "#l-" + next }, "next: " + LESSONS[next].title + " →") : h("a", { class: "btn", href: "#map" }, "home"),
+        h("button", { class: "btn ghost sm", onclick: () => { delete S.beat[L.id]; Object.keys(S.ans).forEach(k => k.startsWith(L.id + "#") && delete S.ans[k]); save(); viewLesson(L); } }, "replay lesson")));
+    ctl.replaceChildren(panel);
+  }
+  renderUpTo(shown);
+  main._step = step;
+}
+document.addEventListener("keydown", e => {
+  if (e.target.matches("input,textarea,select")) return;
+  const m = $("main");
+  if ((e.key === " " || e.key === "Enter") && m && m._step) { e.preventDefault(); m._step(); }
+  if (/^[1-6]$/.test(e.key)) {
+    const qs = $$(".q:not(.answered)"); const q = qs[qs.length - 1];
+    if (q) { const o = $$(".opt", q)[+e.key - 1]; if (o) o.click(); }
+  }
+});
+
+function renderBeat(L, i, onAnswered, pending) {
+  const b = L.beats[i];
+  const wrap = h("div", { class: "beat" });
+  if (b.t === "p") wrap.innerHTML = b.raw ? b.h : `<p>${md(b.h)}</p>`;
+  else if (b.t === "ul") wrap.innerHTML = "<ul>" + b.items.map(x => `<li>${md(x)}</li>`).join("") + "</ul>";
+  else if (b.t === "code") wrap.append(codeBlock(b.c, b.cap));
+  else if (b.t === "edge" || b.t === "rule") wrap.append(h("div", { class: "callout " + b.t, html: md(b.h) }));
+  else if (b.t === "w") {
+    const W = WIDGETS[b.id];
+    const box = h("div", { class: "wg" }, h("div", { class: "wt" }, b.title || W.title), h("div", { class: "wb" }));
+    wrap.append(box);
+    try { W.mount(box.lastChild, b.cfg || {}); } catch (err) { box.lastChild.textContent = "widget error: " + err.message; console.error(err); }
+  }
+  else if (b.t === "q") {
+    const key = L.id + "#" + i;
+    wrap.append(quiz(b, key, ok => onAnswered()));
+    if (S.ans[key] == null) pending.add(i);
+  }
+  else if (b.t === "recall") wrap.append(recall(b));
+  return wrap;
+}
+
+function quiz(b, key, done, opts = {}) {
+  const box = h("div", { class: "q" });
+  box.append(h("div", { class: "qh" }, b.code ? "predict" : "check"));
+  if (b.code) box.append(codeBlock(b.code));
+  box.append(h("div", { class: "qt", html: md(b.q) }));
+  const os = h("div", { class: "opts" });
+  const btns = b.o.map((o, j) => h("button", { class: "opt", onclick: () => pick(j) },
+    h("span", { class: "ix" }, j + 1), h("span", { html: md((o)) })));
+  os.append(...btns); box.append(os);
+  function pick(j, silent) {
+    if (box.classList.contains("answered")) return;
+    box.classList.add("answered");
+    btns.forEach((x, k) => { x.disabled = true; if (k === b.a) x.classList.add("ok"); else if (k === j) x.classList.add("bad"); });
+    const ok = j === b.a;
+    box.append(h("div", { class: "why", html: `<span class="v ${ok ? "ok" : "bad"}">${ok ? "correct." : "nope."}</span>` + md((b.why)) }));
+    if (!silent) {
+      if (key) S.ans[key] = j;
+      if (!opts.noStats) { S.stats.n++; if (ok) S.stats.ok++; }
+      save();
+    }
+    done && done(ok);
+  }
+  if (key && S.ans[key] != null) pick(S.ans[key], true);
+  return box;
+}
+function recall(b) {
+  const box = h("div", { class: "q recall" }, h("div", { class: "qh" }, "free recall — type it before you peek"),
+    h("div", { class: "qt", html: md((b.q)) }));
+  const ta = h("textarea", { placeholder: "your words. retrieval is the workout; recognition is not." });
+  const res = h("div", {});
+  const btn = h("button", { class: "btn sm", onclick: () => {
+    btn.remove();
+    res.append(h("div", { class: "why", html: "<span class='v ok'>model answer:</span>" + md((b.a)) }),
+      h("div", { class: "grades" }, ...["blanked", "partial", "nailed it"].map((g, k) => h("button", { class: "btn sm", onclick: e => {
+        $$(".grades .btn", res).forEach(x => x.disabled = true);
+        e.target.classList.add("pri");
+        res.append(h("p", { class: "muted small" }, ["fine. that's why this card enters your deck at box 0 — you'll see it again soon.", "partial is honest. compare word-by-word against the model answer; the gap is the lesson.", "good. don't get cocky — the deck will test you again in a few days."][k]));
+      } }, g))));
+  } }, "reveal");
+  box.append(ta, h("div", { style: "margin-top:8px" }, btn), res);
+  return box;
+}
+
+/* ---------- review ---------- */
+function viewReview() {
+  touchDay();
+  const main = h("main", {});
+  app().replaceChildren(main);
+  let q = dueCards().sort(() => Math.random() - .5);
+  const total = q.length;
+  function next() {
+    main.replaceChildren(h("div", { class: "kicker" }, "// spaced repetition"), h("h1", {}, "review"));
+    const enrolled = Object.keys(S.cards).length;
+    if (!q.length) {
+      const upcoming = Object.values(S.cards).map(c => c.due).filter(d => d > Date.now()).sort((a, b) => a - b)[0];
+      main.append(h("p", { class: "muted" }, enrolled ? `nothing due. ${enrolled} cards enrolled. next one surfaces ${upcoming ? when(upcoming) : "later"}.` :
+        "deck is empty. clear a lesson to enroll its cards — or cram the whole deck below (worse for retention, but your call)."),
+        h("div", { class: "row" }, h("a", { class: "btn pri", href: "#l-" + nextLesson() }, "go learn something"),
+          h("button", { class: "btn", onclick: () => { q = allCards().sort(() => Math.random() - .5).slice(0, 15); q.cram = true; next(); } }, "cram 15 random cards")));
+      return;
+    }
+    const c = q[0];
+    main.append(h("p", { class: "muted small" }, `${total - q.length + 1} of ${total}${q.cram ? " · cram mode (no scheduling)" : ""} · say the answer out loud, then flip.`));
+    const back = h("div", { class: "back", style: "display:none", html: md((c.a)) });
+    const gr = h("div", { class: "grades", style: "display:none" },
+      ...[["again", "<10m"], ["hard", ""], ["good", ""], ["easy", ""]].map(([g, _], k) => h("button", { class: "btn" + (k === 2 ? " pri" : ""), onclick: () => {
+        if (!q.cram) grade(c.key, k); q.shift(); if (k === 0 && !q.cram) q.push(c); updatePill(); next();
+      } }, g)));
+    const flip = h("button", { class: "btn pri", onclick: () => { back.style.display = ""; gr.style.display = ""; flip.remove(); } }, "flip ␣");
+    main.append(h("div", { class: "card" }, h("div", { class: "kicker" }, LESSONS[c.lid].title),
+      h("div", { class: "front", html: md((c.q)) }), back),
+      h("div", { style: "margin-top:14px", class: "row" }, flip, gr));
+    main._step = () => { if (flip.isConnected) flip.click(); };
+  }
+  next();
+}
+function when(t) {
+  const d = t - Date.now();
+  if (d < 3600e3) return "in " + Math.ceil(d / 60e3) + "m";
+  if (d < DAY) return "in " + Math.round(d / 3600e3) + "h";
+  return "in " + Math.round(d / DAY) + "d";
+}
+
+/* ---------- interleaved drill ---------- */
+function viewMix() {
+  touchDay();
+  const pool = [];
+  const src = ORDER.filter(id => S.done[id] || S.beat[id]);
+  (src.length ? src : ORDER).forEach(id => LESSONS[id].beats.forEach(b => b.t === "q" && pool.push({ b, id })));
+  const set = pool.sort(() => Math.random() - .5).slice(0, 10);
+  let score = 0, n = 0;
+  const main = h("main", {},
+    h("div", { class: "kicker" }, "// interleaving: mixing topics forces you to identify *which* model applies"),
+    h("h1", {}, "drill ×10"),
+    h("p", { class: "muted" }, src.length ? `pulled from the ${src.length} lesson(s) you've touched.` : "you haven't touched any lessons, so this is pulled from everything. expect pain."));
+  const sc = h("div", { class: "big" }, "0/0");
+  main.append(sc);
+  set.forEach(({ b, id }) => main.append(h("div", { class: "beat" }, h("div", { class: "kicker" }, LESSONS[id].title),
+    quiz(b, null, ok => { n++; if (ok) score++; sc.textContent = `${score}/${n}`; if (n === set.length) main.append(h("div", { class: "fin" },
+      h("h3", { style: "margin-top:0" }, score >= 8 ? "solid." : score >= 5 ? "passable. not good." : "humbling. good — now you know where to look."),
+      h("div", { class: "row" }, h("a", { class: "btn pri", href: "#mix", onclick: e => { e.preventDefault(); viewMix(); } }, "another round"), h("a", { class: "btn", href: "#map" }, "home")))); }))));
+  app().replaceChildren(main);
+}
+
+/* ===== widgets part 1: object model + modern core ===== */
+const PAL = ["#f0b23e", "#5ec8b8", "#a99cff", "#6cb2ff", "#ff8fa3", "#9fd78a", "#f5a97f", "#e2c2ff", "#7fe0d0", "#ffd479"];
+function seg(opts, cur, on) {
+  const s = h("div", { class: "seg" });
+  opts.forEach(([v, l]) => s.append(h("button", { class: v === cur ? "on" : "", onclick: () => { $$("button", s).forEach(b => b.classList.remove("on")); s.children[opts.findIndex(o => o[0] === v)].classList.add("on"); on(v); } }, l)));
+  return s;
+}
+function tog(label, val, on) {
+  const cb = h("input", { type: "checkbox" }); cb.checked = !!val;
+  const l = h("label", { class: "tog" + (val ? " on" : "") }, cb, label);
+  cb.addEventListener("change", () => { l.classList.toggle("on", cb.checked); on(cb.checked); });
+  return l;
+}
+
+/* --- code stepper: walk through a program's execution --- */
+WIDGETS.stepper = {
+  title: "execution stepper",
+  mount(el, cfg) {
+    let i = -1;
+    const codeHost = h("div", {}), log = h("div", { class: "log" }), note = h("div", { class: "muted small", style: "min-height:2.6em;margin-top:8px" });
+    const prev = h("button", { class: "btn sm", onclick: () => go(i - 1) }, "← back");
+    const nxt = h("button", { class: "btn sm pri", onclick: () => go(i + 1) }, "step →");
+    const rst = h("button", { class: "btn sm ghost", onclick: () => go(-1) }, "reset");
+    function go(n) {
+      i = Math.max(-1, Math.min(cfg.steps.length - 1, n));
+      const st = cfg.steps[i];
+      codeHost.replaceChildren(codeBlock(cfg.code, "", st ? st.l : []));
+      log.replaceChildren(...cfg.steps.slice(0, i + 1).filter(s => s.log).map((s, k, a) => h("div", { style: k === a.length - 1 ? "color:var(--amb)" : "" }, "› " + s.log)));
+      log.scrollTop = 1e9;
+      note.innerHTML = st ? md(st.note || "") : md(cfg.intro || "press step. predict each line of output *before* it appears.");
+      prev.disabled = i < 0; nxt.disabled = i >= cfg.steps.length - 1;
+    }
+    el.append(h("p", { class: "hint" }, cfg.hint || "step through. say the next output line out loud before you click."),
+      h("div", { class: "col2" }, codeHost, h("div", {}, h("div", { class: "lab" }, "stdout"), log, note)),
+      h("div", { class: "row", style: "margin-top:10px" }, prev, nxt, rst));
+    go(-1);
+  }
+};
+
+/* --- struct layout & padding --- */
+const LT = { "char": [1, 1], "bool": [1, 1], "short": [2, 2], "int": [4, 4], "float": [4, 4], "double": [8, 8], "int64_t": [8, 8], "void*": [8, 8], "char[3]": [3, 1], "std::string": [32, 8] };
+WIDGETS.layout = {
+  title: "struct layout lab (x86-64, itanium abi)",
+  mount(el, cfg) {
+    let mem = (cfg.init || [["char", "a"], ["int", "b"], ["char", "c"], ["double", "d"]]).map(([t, n]) => ({ t, n }));
+    let virt = false, nm = 0;
+    const list = h("div", { class: "mem" }), grid = h("div", { class: "bytes" }), sum = h("div", {});
+    const addSel = h("select", {}, Object.keys(LT).map(k => h("option", { value: k }, k)));
+    function compute() {
+      const out = []; let off = 0, al = 1;
+      if (virt) { out.push({ n: "vptr", t: "void*", off: 0, sz: 8, c: "#888" }); off = 8; al = 8; }
+      mem.forEach((m, i) => {
+        const [sz, a] = LT[m.t]; al = Math.max(al, a);
+        const pad = (a - off % a) % a;
+        if (pad) out.push({ pad, off }); off += pad;
+        out.push({ n: m.n, t: m.t, off, sz, c: PAL[i % PAL.length] }); off += sz;
+      });
+      const tail = (al - off % al) % al;
+      if (tail) out.push({ pad: tail, off, tail: true });
+      return { out, size: off + tail || 1, al, padTotal: out.filter(x => x.pad).reduce((s, x) => s + x.pad, 0) };
+    }
+    function draw() {
+      list.replaceChildren(...mem.map((m, i) => h("div", { class: "mitem" }, h("span", { class: "sw", style: `background:${PAL[i % PAL.length]}` }),
+        `${m.t} ${m.n};`, h("span", { class: "dim" }, ` // ${LT[m.t][0]}B, align ${LT[m.t][1]}`),
+        h("span", { class: "sp" },
+          h("button", { title: "up", onclick: () => { if (i) { [mem[i - 1], mem[i]] = [mem[i], mem[i - 1]]; draw(); } } }, "↑"),
+          h("button", { title: "down", onclick: () => { if (i < mem.length - 1) { [mem[i + 1], mem[i]] = [mem[i], mem[i + 1]]; draw(); } } }, "↓"),
+          h("button", { title: "remove", onclick: () => { mem.splice(i, 1); draw(); } }, "✕")))));
+      const r = compute(); grid.replaceChildren();
+      if (!mem.length && !virt) grid.append(h("div", { class: "by", style: "background:#555;grid-column:span 1" }, "1"));
+      r.out.forEach(x => {
+        const n = x.pad || x.sz;
+        for (let k = 0; k < n; k++) grid.append(x.pad ? h("div", { class: "by pad", title: (x.tail ? "tail " : "") + "padding @" + (x.off + k) }, k === 0 ? "pad" : "") :
+          h("div", { class: "by", style: `background:${x.c}`, title: `${x.n} @${x.off + k}` }, k === 0 ? x.n : ""));
+      });
+      sum.innerHTML = `<div class="row" style="gap:22px;margin-top:12px">
+        <div><div class="lab">sizeof</div><div class="big">${r.size}</div></div>
+        <div><div class="lab">alignof</div><div class="big">${r.al}</div></div>
+        <div><div class="lab">padding</div><div class="big ${r.padTotal ? "badc" : "good"}">${r.padTotal}B</div></div>
+        <div><div class="lab">waste</div><div class="big">${Math.round(100 * r.padTotal / r.size)}%</div></div>
+        <div><div class="lab">per 64B cache line</div><div class="big">${(64 / r.size).toFixed(2)}</div></div></div>
+        ${!mem.length && !virt ? '<p class="small warn">empty struct: sizeof is 1, not 0 — distinct objects need distinct addresses.</p>' : ""}`;
+    }
+    el.append(h("p", { class: "hint" }, "reorder members with ↑↓ and watch the padding move. each row of the grid is one 8-byte word. try to hit zero padding."),
+      h("div", { class: "col2" },
+        h("div", {}, h("div", { class: "lab" }, "struct S {"), list, h("div", { class: "lab" }, "};"),
+          h("div", { class: "row", style: "margin-top:10px" }, addSel,
+            h("button", { class: "btn sm", onclick: () => { mem.push({ t: addSel.value, n: "m" + (nm++) }); draw(); } }, "+ member"),
+            h("button", { class: "btn sm", onclick: () => { mem = mem.map((m, i) => ({ m, i })).sort((a, b) => LT[b.m.t][1] - LT[a.m.t][1] || a.i - b.i).map(x => x.m); draw(); } }, "sort by alignment ↓"),
+            tog("has virtual fn", false, v => { virt = v; draw(); }))),
+        h("div", {}, h("div", { class: "lab" }, "memory (byte offsets 0 →)"), grid)), sum);
+    draw();
+  }
+};
+
+/* --- vtable / virtual dispatch --- */
+WIDGETS.vtable = {
+  title: "vptr / vtable explorer",
+  mount(el) {
+    const st = { ovF: true, ovG: false, h: true, stat: "Base*", dyn: "Derived", ctor: false };
+    const code = h("div", {}), tabs = h("div", {}), trace = h("div", { class: "out" });
+    function vt(cls) {
+      const base = [["f", "Base::f"], ["g", "Base::g"], ["~", "Base::~Base"]];
+      if (cls === "Base") return base;
+      const r = [["f", st.ovF ? "Derived::f" : "Base::f"], ["g", st.ovG ? "Derived::g" : "Base::g"], ["~", "Derived::~Derived"]];
+      if (st.h) r.push(["h", "Derived::h"]);
+      return r;
+    }
+    function draw() {
+      code.replaceChildren(codeBlock(C`
+struct Base {
+  int b;
+  virtual void f();
+  virtual void g();
+  virtual ~Base();
+};
+struct Derived : Base {
+  int d;${st.ovF ? "\n  void f() override;" : ""}${st.ovG ? "\n  void g() override;" : ""}${st.h ? "\n  virtual void h();" : ""}
+  ~Derived() override;
+};`));
+      const effDyn = st.ctor ? "Base" : st.dyn;
+      const tb = cls => h("div", { style: "flex:1;min-width:200px" },
+        h("div", { class: "lab" }, `vtable for ${cls}` + (effDyn === cls && st.dyn === "Derived" && st.ctor && cls === "Base" ? " ← vptr points here during Base()" : "")),
+        h("table", { class: "t" }, h("tr", {}, h("th", {}, "slot"), h("th", {}, "→")),
+          ...vt(cls).map(([k, v], i) => h("tr", {}, h("td", {}, `[${i}] ${k === "~" ? "dtor" : k}`), h("td", { class: v.startsWith("Derived") ? "warn" : "" }, v)))));
+      const obj = h("div", { style: "min-width:150px" }, h("div", { class: "lab" }, `object (${st.dyn})`),
+        h("table", { class: "t" }, h("tr", {}, h("td", {}, "+0"), h("td", {}, `vptr → ${effDyn} vtbl`)), h("tr", {}, h("td", {}, "+8"), h("td", {}, "int b")),
+          st.dyn === "Derived" ? h("tr", {}, h("td", {}, "+12"), h("td", {}, "int d")) : null),
+        h("div", { class: "dim small" }, `sizeof = ${st.dyn === "Derived" ? 16 : 16}`));
+      tabs.replaceChildren(h("div", { class: "row", style: "align-items:flex-start;gap:14px" }, obj, tb("Base"), tb("Derived")));
+    }
+    function call(fn) {
+      const effDyn = st.ctor ? "Base" : st.dyn;
+      if (st.stat === "Derived*" && st.dyn === "Base") { trace.innerHTML = `<span class="badc">Derived* p = new Base; — doesn't compile (no implicit downcast). a static_cast here would be UB.</span>`; return; }
+      if (fn === "h" && st.stat === "Base*") { trace.innerHTML = `<span class="badc">error: 'Base' has no member 'h'. name lookup uses the STATIC type. the vtable has the slot; the compiler won't let you name it.</span>`; return; }
+      if (fn === "h" && !st.h) { trace.innerHTML = `<span class="badc">no h() declared.</span>`; return; }
+      const tbl = vt(effDyn); const i = tbl.findIndex(x => x[0] === fn);
+      if (i < 0) { trace.innerHTML = `<span class="badc">no slot for ${fn} in ${effDyn}'s vtable — you're inside Base(), the Derived part doesn't exist yet.</span>`; return; }
+      trace.innerHTML = `${st.stat} p; p->${fn}();\n` +
+        `  1. compiler: ${fn} is virtual in ${st.stat.slice(0, -1)} → emit indirect call through slot [${i}]\n` +
+        `  2. runtime: load p->vptr          → ${effDyn}'s vtable${st.ctor ? "  (vptr was set to Base's vtable at the start of Base())" : ""}\n` +
+        `  3. load vtbl[${i}]                   → <span class="warn">${tbl[i][1]}</span>\n` +
+        `  4. call it with this = p\n` +
+        `cost: 2 dependent loads + indirect branch. the real cost: no inlining across it (unless devirtualized).`;
+    }
+    el.append(h("p", { class: "hint" }, "toggle overrides; pick the static and dynamic type; make the call. watch which slot gets read."),
+      h("div", { class: "row" }, tog("Derived overrides f", st.ovF, v => { st.ovF = v; draw(); }), tog("overrides g", st.ovG, v => { st.ovG = v; draw(); }), tog("adds virtual h", st.h, v => { st.h = v; draw(); })),
+      h("div", { class: "col2", style: "margin-top:10px" }, code, h("div", {},
+        h("div", { class: "row" }, h("span", { class: "lab" }, "static type"), seg([["Base*", "Base*"], ["Derived*", "Derived*"]], st.stat, v => { st.stat = v; })),
+        h("div", { class: "row", style: "margin-top:6px" }, h("span", { class: "lab" }, "points to"), seg([["Derived", "new Derived"], ["Base", "new Base"]], st.dyn, v => { st.dyn = v; draw(); })),
+        h("div", { class: "row", style: "margin-top:6px" }, tog("call happens inside Base::Base()", false, v => { st.ctor = v; draw(); })),
+        h("div", { class: "row", style: "margin-top:10px" }, ...["f", "g", "h"].map(f => h("button", { class: "btn sm pri", onclick: () => call(f) }, `p->${f}()`))))),
+      tabs, h("div", { style: "margin-top:10px" }, trace),
+      h("p", { class: "dim small" }, "simplified: real itanium vtables also hold offset-to-top and an rtti pointer above slot 0, and two destructor entries (complete + deleting)."));
+    draw(); trace.textContent = "make a call →";
+  }
+};
+
+/* --- special member generation rules --- */
+WIDGETS.specials = {
+  title: "what does the compiler generate?",
+  mount(el) {
+    const u = { other: false, dtor: false, cc: false, ca: false, mc: false, ma: false };
+    const out = h("div", {}), q = h("div", {});
+    const names = { other: "X(int)", dtor: "~X()", cc: "X(const X&)", ca: "X& operator=(const X&)", mc: "X(X&&)", ma: "X& operator=(X&&)" };
+    function status() {
+      const r = {};
+      r.def = (u.other || u.cc || u.mc) ? ["not declared", "badc"] : ["defaulted", "good"];
+      r.cc = u.cc ? ["user-declared", "warn"] : (u.mc || u.ma) ? ["deleted", "badc"] : (u.ca || u.dtor) ? ["defaulted (deprecated!)", "warn"] : ["defaulted", "good"];
+      r.ca = u.ca ? ["user-declared", "warn"] : (u.mc || u.ma) ? ["deleted", "badc"] : (u.cc || u.dtor) ? ["defaulted (deprecated!)", "warn"] : ["defaulted", "good"];
+      r.mc = u.mc ? ["user-declared", "warn"] : (u.cc || u.ca || u.ma || u.dtor) ? ["not declared", "badc"] : ["defaulted", "good"];
+      r.ma = u.ma ? ["user-declared", "warn"] : (u.cc || u.ca || u.mc || u.dtor) ? ["not declared", "badc"] : ["defaulted", "good"];
+      r.dtor = u.dtor ? ["user-declared", "warn"] : ["defaulted", "good"];
+      return r;
+    }
+    function draw() {
+      const r = status();
+      const rows = [["X()", r.def], ["X(const X&)", r.cc], ["operator=(const X&)", r.ca], ["X(X&&)", r.mc], ["operator=(X&&)", r.ma], ["~X()", r.dtor]];
+      out.replaceChildren(h("table", { class: "t" }, h("tr", {}, h("th", {}, "member"), h("th", {}, "status")),
+        ...rows.map(([n, [s, c]]) => h("tr", {}, h("td", {}, n), h("td", { class: c }, s)))));
+      const res = (mv, cp) => mv[0] === "user-declared" || mv[0] === "defaulted" ? `<span class="good">move</span>` :
+        (cp[0] === "deleted" ? `<span class="badc">compile error (copy is deleted, move not declared)</span>` : `<span class="warn">COPY — silently. no move exists, rvalue binds to const X&</span>`);
+      q.innerHTML = `<table class="t"><tr><th>expression</th><th>calls</th></tr>
+        <tr><td>X b = std::move(a);</td><td>${res(r.mc, r.cc)}</td></tr>
+        <tr><td>b = std::move(a);</td><td>${res(r.ma, r.ca)}</td></tr>
+        <tr><td>X c;</td><td>${r.def[0] === "defaulted" ? '<span class="good">default ctor</span>' : '<span class="badc">compile error: no default ctor</span>'}</td></tr></table>`;
+    }
+    el.append(h("p", { class: "hint" }, "check what YOU declare in class X. the table shows what the compiler then does. (\"declare\" includes `= default` — declaring it is what counts.)"),
+      h("div", { class: "row" }, ...Object.keys(u).map(k => tog(names[k], false, v => { u[k] = v; draw(); }))),
+      h("div", { class: "col2", style: "margin-top:12px" }, out, q));
+    draw();
+  }
+};
+
+/* --- template type deduction --- */
+WIDGETS.deduce = {
+  title: "template type deduction simulator",
+  mount(el) {
+    const args = [["x", "int x = 1;"], ["cx", "const int cx = x;"], ["rx", "const int& rx = x;"], ["27", "(prvalue)"], ["arr", 'const char arr[13] = "hello, world";'], ["func", "void func(int);"]];
+    const P = {
+      "T&": { x: ["int", "int&"], cx: ["const int", "const int&"], rx: ["const int", "const int&"], 27: null, arr: ["const char[13]", "const char (&)[13]"], func: ["void(int)", "void (&)(int)"] },
+      "const T&": { x: ["int", "const int&"], cx: ["int", "const int&"], rx: ["int", "const int&"], 27: ["int", "const int&"], arr: ["char[13]", "const char (&)[13]"], func: ["void(int)", "void (&)(int)"] },
+      "T&&": { x: ["int&", "int&"], cx: ["const int&", "const int&"], rx: ["const int&", "const int&"], 27: ["int", "int&&"], arr: ["const char (&)[13]", "const char (&)[13]"], func: ["void (&)(int)", "void (&)(int)"] },
+      "T": { x: ["int", "int"], cx: ["int", "int"], rx: ["int", "int"], 27: ["int", "int"], arr: ["const char*", "const char*"], func: ["void (*)(int)", "void (*)(int)"] },
+    };
+    const why = {
+      "T&": "reference-ness of the arg is ignored, then pattern-match. const survives (it's part of what's referred to). rvalues can't bind → no deduction.",
+      "const T&": "const is already in the param, so it's peeled off T. anything binds, rvalues included.",
+      "T&&": "forwarding reference: lvalue arg → T = U& and collapsing gives U&. rvalue arg → T = U, param U&&. this is the ONLY case where T itself becomes a reference.",
+      "T": "by value = a fresh copy. top-level const and refs are dropped (the copy is independent). arrays and functions DECAY to pointers.",
+    };
+    let p = "T", a = "cx";
+    const code = h("div", {}), res = h("div", {});
+    function draw() {
+      code.replaceChildren(codeBlock(`template<typename T>\nvoid f(${p} param);\n\n${args.find(x => x[0] === a)[1]}\nf(${a});`));
+      const r = P[p][a];
+      res.innerHTML = r ? `<div class="row" style="gap:28px"><div><div class="lab">T deduced as</div><div class="big warn">${esc(r[0])}</div></div>
+        <div><div class="lab">param type</div><div class="big">${esc(r[1])}</div></div></div><p class="muted small">${esc(why[p])}</p>`
+        : `<div class="big badc">no match</div><p class="muted small">27 is an rvalue; a non-const lvalue reference can't bind to it. deduction fails, overload discarded.</p>`;
+    }
+    el.append(h("p", { class: "hint" }, "predict T and the param type for each combo before you look. the four shapes cover ~all of auto, too (auto x = … is the T case; auto& is T&; auto&& is T&&)."),
+      h("div", { class: "row" }, h("span", { class: "lab" }, "param"), seg(Object.keys(P).map(k => [k, k]), p, v => { p = v; draw(); })),
+      h("div", { class: "row", style: "margin-top:6px" }, h("span", { class: "lab" }, "argument"), seg(args.map(x => [x[0], x[0]]), a, v => { a = v; draw(); })),
+      h("div", { class: "col2", style: "margin-top:12px" }, code, res));
+    draw();
+  }
+};
+
+/* --- vector growth: move_if_noexcept --- */
+WIDGETS.vecgrow = {
+  title: "vector reallocation lab",
+  mount(el) {
+    const kinds = {
+      nx: ["move ctor noexcept", true, true], th: ["move ctor may throw (copyable)", false, true], mo: ["move-only, may throw", false, false], co: ["copy only (no move ctor)", null, true]
+    };
+    let kind = "nx", growth = "2x", size = 0, cap = 0, cp = 0, mv = 0, al = 0;
+    const cells = h("div", {}), stats = h("div", {}), log = h("div", { class: "log", style: "min-height:80px" });
+    function newCap(need) { if (growth === "2x") return Math.max(need, cap * 2 || 1); let n = cap + Math.floor(cap / 2); return Math.max(n, need); }
+    function relocate(nc) {
+      const [, noex, copyable] = kinds[kind];
+      const useMove = noex === true || (noex === false && !copyable);
+      const how = noex === null ? "copy" : useMove ? "move" : "copy";
+      if (how === "move") mv += size; else cp += size;
+      al++;
+      log.prepend(h("div", {}, `realloc ${cap}→${nc}: ${size} element(s) ${how === "move" ? "MOVED" : "COPIED"}` +
+        (kind === "th" ? " — move exists but isn't noexcept, so vector copies to keep the strong guarantee" : kind === "mo" ? " — no copy available, so it moves anyway; strong guarantee lost" : "")));
+      cap = nc;
+    }
+    function push(n = 1) {
+      for (let k = 0; k < n; k++) { if (size === cap) relocate(newCap(size + 1)); size++; if (kind === "co") cp++; else mv++; }
+      draw(true);
+    }
+    function draw(fl) {
+      cells.replaceChildren(...Array.from({ length: Math.max(cap, 1) }, (_, i) => h("span", { class: "cell " + (i < size ? "f" : "cap") + (fl && i === size - 1 ? " flash" : "") }, i < size ? "e" + i : "")));
+      stats.innerHTML = `<div class="row" style="gap:22px;margin-top:8px">
+        <div><div class="lab">size / cap</div><div class="big">${size}/${cap}</div></div>
+        <div><div class="lab">allocations</div><div class="big">${al}</div></div>
+        <div><div class="lab">copies</div><div class="big ${cp ? "badc" : "good"}">${cp}</div></div>
+        <div><div class="lab">moves</div><div class="big">${mv}</div></div></div>`;
+    }
+    function reset() { size = cap = cp = mv = al = 0; log.replaceChildren(); draw(); }
+    el.append(h("p", { class: "hint" }, "push_back(std::move(x)) into a vector. each push counts as one move; reallocations relocate everything already inside. change the element type and push 20."),
+      h("div", { class: "row" }, h("span", { class: "lab" }, "element"), seg(Object.entries(kinds).map(([k, v]) => [k, v[0]]), kind, v => { kind = v; reset(); })),
+      h("div", { class: "row", style: "margin-top:6px" }, h("span", { class: "lab" }, "growth"), seg([["2x", "×2 (libstdc++, libc++)"], ["1.5x", "×1.5 (msvc)"]], growth, v => { growth = v; reset(); })),
+      h("div", { class: "row", style: "margin-top:10px" }, h("button", { class: "btn sm pri", onclick: () => push(1) }, "push_back"), h("button", { class: "btn sm", onclick: () => push(10) }, "×10"),
+        h("button", { class: "btn sm", onclick: () => { if (cap < 32) { if (size) relocate(32); else { cap = 32; al++; log.prepend(h("div", {}, "reserve(32): one allocation, nothing to relocate")); } draw(); } } }, "reserve(32)"),
+        h("button", { class: "btn sm ghost", onclick: reset }, "reset")),
+      h("div", { style: "margin-top:10px" }, cells), stats, h("div", { class: "lab", style: "margin-top:10px" }, "log (newest first)"), log);
+    draw();
+  }
+};
+
+/* --- reference collapsing --- */
+WIDGETS.collapse = {
+  title: "reference collapsing",
+  mount(el) {
+    let T = "int&", P = "T&&";
+    const out = h("div", {});
+    function draw() {
+      const tr = T.endsWith("&&") ? "&&" : T.endsWith("&") ? "&" : "";
+      const pr = P === "T&&" ? "&&" : "&";
+      const base = "int";
+      const res = !tr ? base + pr : (tr === "&&" && pr === "&&") ? base + "&&" : base + "&";
+      const when = { "int": "an rvalue (e.g. f(42) or f(std::move(x)))", "int&": "an lvalue (e.g. f(x))", "int&&": "explicit f<int&&>(…), or inside std::forward<int&&>" }[T];
+      out.innerHTML = `<pre class="code">${hl(`// T = ${T}\n// ${P} → ${T.replace("int", "int")} ${pr}  →  collapses to:`)}</pre>
+        <div class="big warn">${esc(res)}</div>
+        <p class="muted small">T becomes <code>${esc(T)}</code> when you pass ${esc(when)}. ${tr === "&" ? "any & in the pile wins → lvalue ref. that's how one template accepts lvalues without copying." : tr === "&&" && pr === "&&" ? "only && + && stays &&." : "no reference on T, nothing to collapse."}</p>`;
+    }
+    el.append(h("p", { class: "hint" }, "you can't write `int& &&` yourself, but templates and aliases produce it constantly. rule: if either side is &, result is &."),
+      h("div", { class: "row" }, h("span", { class: "lab" }, "T ="), seg([["int", "int"], ["int&", "int&"], ["int&&", "int&&"]], T, v => { T = v; draw(); }),
+        h("span", { class: "lab" }, "param"), seg([["T&", "T&"], ["T&&", "T&&"]], P, v => { P = v; draw(); })),
+      h("div", { style: "margin-top:10px" }, out));
+    draw();
+  }
+};
+
+/* --- shared_ptr / weak_ptr control block --- */
+WIDGETS.sptr = {
+  title: "control block simulator",
+  mount(el) {
+    let s;
+    const view = h("div", {}), log = h("div", { class: "log", style: "min-height:90px" }), btns = h("div", { class: "row" });
+    function reset(ms) { s = { ms, made: false, a: false, b: false, w: false, strong: 0, weak: 0, obj: false, objMem: false, cb: false }; log.replaceChildren(); draw(); }
+    function L(t, c) { log.prepend(h("div", { class: c || "" }, t)); }
+    function dec() {
+      s.strong--;
+      if (s.strong === 0) {
+        s.obj = false; L("strong → 0: ~Widget() runs", "warn");
+        if (!s.ms) { s.objMem = false; L("  object's own allocation freed"); }
+        else L("  …but with make_shared the object's bytes live INSIDE the control block allocation → memory stays while weak > 0");
+        if (s.weak === 0) freeCB();
+      }
+    }
+    function freeCB() { s.cb = false; if (s.ms) s.objMem = false; L(s.ms ? "weak → 0 too: single block (cb + object storage) freed" : "control block freed", "good"); }
+    const acts = [
+      ["auto a = make_shared<Widget>()", () => !s.made, () => { Object.assign(s, { made: true, a: true, strong: 1, obj: true, objMem: true, cb: true, ms: true }); L("1 allocation: [control block | Widget]"); }],
+      ["shared_ptr<Widget> a(new Widget)", () => !s.made, () => { Object.assign(s, { made: true, a: true, strong: 1, obj: true, objMem: true, cb: true, ms: false }); L("2 allocations: Widget, then control block"); }],
+      ["auto b = a;", () => s.a && !s.b, () => { s.b = true; s.strong++; L("copy: atomic increment of strong count"); }],
+      ["weak_ptr w = a;", () => s.a && !s.w, () => { s.w = true; s.weak++; L("weak count +1 (object lifetime unaffected)"); }],
+      ["a.reset();", () => s.a, () => { s.a = false; L("a releases"); dec(); }],
+      ["b.reset();", () => s.b, () => { s.b = false; L("b releases"); dec(); }],
+      ["auto p = w.lock();", () => s.w, () => { L(s.strong > 0 ? "lock(): strong was > 0 → returns a live shared_ptr (atomically checks + increments)" : "lock(): strong == 0 → returns empty shared_ptr. this is the ONLY safe way to ask 'still alive?'", s.strong > 0 ? "good" : "badc"); }],
+      ["w.reset();", () => s.w, () => { s.w = false; s.weak--; L("weak count −1"); if (s.strong === 0 && s.weak === 0) freeCB(); }],
+    ];
+    function draw() {
+      btns.replaceChildren(...acts.map(([t, en, f]) => { const b = h("button", { class: "btn sm", onclick: () => { f(); draw(); } }, t); b.disabled = !en(); return b; }),
+        h("button", { class: "btn sm ghost", onclick: () => reset(false) }, "reset"));
+      const box = (lbl, on) => `<span class="cell ${on ? "f" : "cap"}" style="width:auto;padding:0 10px">${lbl}${on ? "" : " ∅"}</span>`;
+      view.innerHTML = `<div class="row" style="gap:26px;align-items:flex-start;margin:12px 0">
+        <div><div class="lab">handles</div>${box("a", s.a)}${box("b", s.b)}${box("w (weak)", s.w)}</div>
+        <div><div class="lab">control block ${s.cb ? "" : "(freed)"}</div><table class="t"><tr><td>use_count</td><td class="big" style="font-size:18px">${s.strong}</td></tr><tr><td>weak refs</td><td class="big" style="font-size:18px">${s.weak}</td></tr></table></div>
+        <div><div class="lab">Widget</div>${s.made ? `<div class="mono small">object: ${s.obj ? '<span class="good">alive</span>' : '<span class="badc">destroyed</span>'}<br>its memory: ${s.objMem ? (s.obj ? "allocated" : '<span class="warn">still allocated!</span>') : "freed"}</div>` : '<span class="dim">—</span>'}</div></div>`;
+    }
+    el.append(h("p", { class: "hint" }, "run the sequence: make_shared → copy → weak → reset a → reset b → lock → reset w. then redo it with `new`. notice when memory actually returns."), btns, view, h("div", { class: "lab" }, "log (newest first)"), log);
+    reset(false);
+  }
+};
+
+/* --- lambda → closure class --- */
+WIDGETS.lambda = {
+  title: "lambda desugarer",
+  mount(el) {
+    const P = {
+      "[x]": [C`int x = 1;
+auto f = [x] { return x + 1; };`, C`class __lambda_1 {
+  int x;                         // copied NOW, at creation
+public:
+  __lambda_1(int x) : x(x) {}
+  int operator()() const {       // const: can't modify x
+    return x + 1;
+  }
+};
+auto f = __lambda_1{x};`, "the copy is taken at the lambda expression, not at the call."],
+      "[&x]": [C`int x = 1;
+auto f = [&x] { return x + 1; };`, C`class __lambda_1 {
+  int& x;                        // a reference member
+public:
+  __lambda_1(int& x) : x(x) {}
+  int operator()() const {       // const applies to the ref, not to x
+    return x + 1;                // reads x at CALL time
+  }
+};`, "outlive x and you hold a dangling reference. the compiler won't warn."],
+      "[=]": [C`int x = 1, y = 2;
+auto f = [=] { return x + y; };`, C`class __lambda_1 {
+  int x; int y;                  // only names actually USED get captured
+public:
+  int operator()() const { return x + y; }
+};`, "default captures hide *what* you captured. in a member function, [=] captured `this` (pointer!) pre-c++20 — not the members."],
+      "[&]": [C`int x = 1, y = 2;
+auto f = [&] { return x + y; };`, C`class __lambda_1 {
+  int& x; int& y;
+public:
+  int operator()() const { return x + y; }
+};`, "fine for immediate use (std::sort comparator). lethal if f escapes the scope."],
+      "[v = std::move(v)]": [C`std::vector<int> v(1000);
+auto f = [v = std::move(v)] { return v.size(); };`, C`class __lambda_1 {
+  std::vector<int> v;            // init-capture: any expression
+public:
+  __lambda_1(std::vector<int>&& v) : v(std::move(v)) {}
+  size_t operator()() const { return v.size(); }
+};`, "c++14 init-capture: the way to move into a closure (unique_ptr, big buffers)."],
+      "[this]": [C`struct Widget {
+  int n = 0;
+  auto getter() { return [this] { return n; }; }
+};`, C`class __lambda_1 {
+  Widget* __this;                // a raw pointer. that's it.
+public:
+  int operator()() const { return __this->n; }
+};`, "n is not captured — `this` is. if the Widget dies, the closure dangles."],
+      "[*this]": [C`struct Widget {
+  int n = 0;
+  auto getter() { return [*this] { return n; }; }
+};`, C`class __lambda_1 {
+  Widget __self;                 // c++17: copy of the whole object
+public:
+  int operator()() const { return __self.n; }
+};`, "safe to outlive the original — at the cost of a copy."],
+    };
+    let k = "[x]", mut = false;
+    const out = h("div", { class: "col2" }), note = h("p", { class: "muted small" });
+    function draw() {
+      let [src, gen, n] = P[k];
+      if (mut) { src = src.replace("] {", "]() mutable {"); gen = gen.replace(/operator\(\)\(\) const/g, "operator()()").replace("// const: can't modify x", "// mutable: const dropped"); }
+      out.replaceChildren(h("div", {}, h("div", { class: "lab" }, "you write"), codeBlock(src)), h("div", {}, h("div", { class: "lab" }, "compiler (roughly) writes"), codeBlock(gen)));
+      note.innerHTML = md(n + (mut ? " · `mutable` removes const from operator() — the closure's copy can change, and that state persists across calls of *this* closure object." : ""));
+    }
+    el.append(h("p", { class: "hint" }, "a lambda is syntax for an anonymous class with operator(). pick a capture; read the class."),
+      h("div", { class: "row" }, seg(Object.keys(P).map(x => [x, x]), k, v => { k = v; draw(); }), tog("mutable", false, v => { mut = v; draw(); })),
+      h("div", { style: "margin-top:10px" }, out), note);
+    draw();
+  }
+};
+
+/* ===== widgets part 2: library/perf, compile-time, concurrency ===== */
+
+/* --- iterator invalidation --- */
+WIDGETS.invalid = {
+  title: "iterator invalidation lab",
+  mount(el) {
+    let c = "vector", els, cap, hs, nid, msg;
+    const view = h("div", {}), btns = h("div", { class: "row" }), out = h("div", { class: "out", style: "margin-top:10px" });
+    function reset() {
+      nid = 0; els = [10, 20, 30, 40].map(v => ({ id: nid++, v })); cap = 5;
+      hs = [{ n: "it1", tgt: 1, ok: true }, { n: "it3", tgt: 3, ok: true }, { n: "end", tgt: "end", ok: true }, { n: "&ref1", tgt: 1, ok: true, ref: true }];
+      msg = "iterators it1→20, it3→40, end, and a reference ref1→20. pick an operation; predict which die BEFORE clicking."; draw();
+    }
+    const idx = hs_ => hs_.tgt === "end" ? els.length : els.findIndex(e => e.id === hs_.tgt);
+    function kill(pred, why) { const k = []; hs.forEach(x => { if (x.ok && pred(x)) { x.ok = false; k.push(x.n); } }); msg = (k.length ? `invalidated: ${k.join(", ")}` : "nothing invalidated") + "\n" + why; }
+    function op(o) {
+      const n = els.length, mid = 2;
+      if (c === "vector") {
+        if (o === "push_back") { const re = n === cap; if (re) cap *= 2; els.push({ id: nid++, v: 50 + n }); re ? kill(() => true, `size == capacity → reallocation. every iterator, pointer and reference now points into freed memory.`) : kill(x => x.tgt === "end", "had spare capacity → no realloc. only end() moved."); }
+        if (o === "insert") { const re = n === cap; if (re) cap *= 2; const before = hs.map(idx); els.splice(mid, 0, { id: nid++, v: 25 }); re ? kill(() => true, "insert triggered reallocation → everything.") : kill((x) => before[hs.indexOf(x)] >= mid, "no realloc, but elements at/after the insert point shifted right → anything referring there is invalid (it now refers to a different element or UB)."); }
+        if (o === "erase") { if (n <= mid) { msg = "too few elements"; return draw(); } const before = hs.map(idx); els.splice(mid, 1); kill(x => before[hs.indexOf(x)] >= mid, "erase shifts the tail left → iterators/refs at or after the erase point are invalid; before it are fine."); }
+        if (o === "reserve") { cap = Math.max(cap * 2, 8); kill(() => true, "reserve() above capacity reallocates → all invalid. (that's why you reserve BEFORE taking iterators.)"); }
+      } else if (c === "deque") {
+        if (o === "push_back" || o === "push_front") { o === "push_back" ? els.push({ id: nid++, v: 50 }) : els.unshift({ id: nid++, v: 5 }); kill(x => !x.ref, "deque quirk: pushing at either end invalidates ALL iterators (the block map may reallocate) but references stay valid — elements never move."); }
+        if (o === "insert") { els.splice(mid, 0, { id: nid++, v: 25 }); kill(() => true, "insert in the middle of a deque: all iterators AND references invalid."); }
+        if (o === "erase") { if (n <= mid) { msg = "too few"; return draw(); } const e = els[mid]; const last = mid === n - 1; els.splice(mid, 1); last ? kill(x => x.tgt === e.id || x.tgt === "end", "erasing the last element: only it and end()") : kill(() => true, "erasing in the middle of a deque: everything invalid."); }
+      } else {
+        if (o === "push_back" || o === "push_front") { o === "push_back" ? els.push({ id: nid++, v: 50 }) : els.unshift({ id: nid++, v: 5 }); kill(() => false, "node-based: inserting allocates one new node. nothing else moves. nothing invalidated."); }
+        if (o === "insert") { els.splice(mid, 0, { id: nid++, v: 25 }); kill(() => false, "list insert never invalidates anything."); }
+        if (o === "erase") { if (n <= mid) { msg = "too few"; return draw(); } const e = els[mid]; els.splice(mid, 1); kill(x => x.tgt === e.id, "only handles to the erased node die."); }
+      }
+      // handles whose element vanished
+      hs.forEach(x => { if (x.ok && x.tgt !== "end" && !els.some(e => e.id === x.tgt)) x.ok = false; });
+      draw();
+    }
+    function draw() {
+      const ops = c === "vector" ? ["push_back", "insert", "erase", "reserve"] : ["push_back", "push_front", "insert", "erase"];
+      const lbl = { push_back: "push_back(x)", push_front: "push_front(x)", insert: "insert(begin()+2, x)", erase: "erase(begin()+2)", reserve: "reserve(2·cap)" };
+      btns.replaceChildren(...ops.map(o => h("button", { class: "btn sm pri", onclick: () => op(o) }, lbl[o])), h("button", { class: "btn sm ghost", onclick: reset }, "reset"));
+      const tag = x => `<span class="mono small ${x.ok ? "good" : "badc"}" style="${x.ok ? "" : "text-decoration:line-through"}">${x.n}</span>`;
+      const slots = (c === "vector" ? Array.from({ length: cap }, (_, i) => els[i]) : els).map((e, i) =>
+        `<div style="display:inline-block;text-align:center;vertical-align:top;margin:2px"><span class="cell ${e ? "f" : "cap"}">${e ? e.v : ""}</span><div style="min-height:2.6em;line-height:1.1">${e ? hs.filter(x => x.tgt === e.id).map(tag).join("<br>") : ""}${!e && i === els.length ? hs.filter(x => x.tgt === "end").map(tag).join("<br>") : ""}</div></div>`).join(c === "list" ? "<span class='dim'>⇄</span>" : "");
+      const endTag = c !== "vector" || els.length >= cap ? `<div style="display:inline-block;text-align:center;vertical-align:top;margin:2px"><span class="cell cap">end</span><div>${hs.filter(x => x.tgt === "end").map(tag).join("")}</div></div>` : "";
+      view.innerHTML = `<div style="margin-top:12px">${slots}${endTag}</div>${c === "vector" ? `<div class="dim small">size ${els.length} · capacity ${cap}</div>` : ""}`;
+      out.textContent = msg;
+    }
+    el.append(h("p", { class: "hint" }, "same operations, three containers, three different contracts. this is where 'works on my machine' UB comes from."),
+      h("div", { class: "row" }, seg([["vector", "std::vector"], ["deque", "std::deque"], ["list", "std::list"]], c, v => { c = v; reset(); })),
+      h("div", { style: "margin-top:10px" }, btns), view, out);
+    reset();
+  }
+};
+
+/* --- cache line utilization: AoS vs SoA --- */
+WIDGETS.cache = {
+  title: "cache line utilization: AoS vs SoA",
+  mount(el) {
+    const F = ["x", "y", "z", "vx", "vy", "vz", "id", "hp"], N = 32;
+    const FC = { x: "#6cb2ff", y: "#6cb2ff", z: "#6cb2ff", vx: "#a99cff", vy: "#a99cff", vz: "#a99cff", id: "#888", hp: "#f0b23e" };
+    const tasks = { hp: ["sum all hp", ["hp"]], int: ["pos += vel", ["x", "y", "z", "vx", "vy", "vz"]], all: ["serialize everything", F] };
+    let lay = "aos", task = "hp";
+    const grid = h("div", {}), st = h("div", {});
+    function draw() {
+      const use = tasks[task][1];
+      const bytes = []; // 1024 bytes, field per byte
+      if (lay === "aos") for (let p = 0; p < N; p++) F.forEach(f => { for (let k = 0; k < 4; k++) bytes.push(f); });
+      else F.forEach(f => { for (let p = 0; p < N; p++) for (let k = 0; k < 4; k++) bytes.push(f); });
+      const lines = [];
+      for (let l = 0; l < 16; l++) lines.push(bytes.slice(l * 64, l * 64 + 64));
+      const touched = lines.map(L => L.some(f => use.includes(f)));
+      grid.replaceChildren(...lines.map((L, i) => h("div", { style: `display:flex;gap:1px;margin:1px 0;align-items:center;opacity:${touched[i] ? 1 : .25}` },
+        h("span", { class: "mono", style: "font-size:10px;width:52px;color:var(--tx3)" }, `line ${i}`),
+        ...L.map(f => h("span", { title: f, style: `flex:1;height:12px;border-radius:1px;background:${use.includes(f) ? FC[f] : "#2a313b"}` })),
+        h("span", { class: "mono", style: "font-size:10px;width:60px;text-align:right;color:" + (touched[i] ? "var(--amb)" : "var(--tx3)") }, touched[i] ? "fetched" : "skipped"))));
+      const nt = touched.filter(Boolean).length, useful = N * 4 * use.length;
+      st.innerHTML = `<div class="row" style="gap:24px;margin-top:10px">
+        <div><div class="lab">lines fetched</div><div class="big">${nt}/16</div></div>
+        <div><div class="lab">bytes moved</div><div class="big">${nt * 64}</div></div>
+        <div><div class="lab">bytes used</div><div class="big">${useful}</div></div>
+        <div><div class="lab">utilization</div><div class="big ${useful / (nt * 64) > .7 ? "good" : "badc"}">${Math.round(100 * useful / (nt * 64))}%</div></div></div>`;
+    }
+    el.append(h("p", { class: "hint" }, "32 particles, 8 four-byte fields each (1 KiB). the cpu never fetches a byte — it fetches 64-byte lines. colored = bytes your loop actually needs."),
+      h("div", { class: "row" }, seg([["aos", "struct Particle[32]  (AoS)"], ["soa", "struct { float x[32], y[32] … }  (SoA)"]], lay, v => { lay = v; draw(); })),
+      h("div", { class: "row", style: "margin-top:6px" }, h("span", { class: "lab" }, "loop"), seg(Object.entries(tasks).map(([k, v]) => [k, v[0]]), task, v => { task = v; draw(); })),
+      h("div", { style: "margin-top:12px" }, grid), st,
+      h("p", { class: "dim small" }, "try 'serialize everything': SoA buys nothing. layout follows access pattern — there's no universally right answer, only measured ones."));
+    draw();
+  }
+};
+
+/* --- small string optimization --- */
+WIDGETS.sso = {
+  title: "small string optimization",
+  mount(el) {
+    const impl = [["libstdc++ (gcc)", 32, 15], ["libc++ (clang)", 24, 22], ["msvc stl", 32, 15]];
+    const inp = h("input", { type: "text", value: "hello", style: "width:100%" });
+    const out = h("div", {});
+    function draw() {
+      const n = new TextEncoder().encode(inp.value).length;
+      out.innerHTML = `<table class="t" style="margin-top:10px"><tr><th>impl</th><th>sizeof(std::string)</th><th>inline capacity</th><th>"${esc(inp.value.slice(0, 24))}${inp.value.length > 24 ? "…" : ""}" (${n} B)</th></tr>` +
+        impl.map(([nm, sz, c]) => `<tr><td>${nm}</td><td>${sz}</td><td>${c} chars</td><td class="${n <= c ? "good" : "badc"}">${n <= c ? "inline — zero heap allocations" : "HEAP — malloc + pointer chase"}</td></tr>`).join("") + "</table>";
+    }
+    inp.addEventListener("input", draw);
+    el.append(h("p", { class: "hint" }, "type a string. the object itself has room for a short buffer; beyond that it allocates. (64-bit, release builds; bytes, not characters — try an emoji.)"), inp, out);
+    draw();
+  }
+};
+
+/* --- template instantiation vs runtime recursion --- */
+WIDGETS.fib = {
+  title: "instantiation is memoized",
+  mount(el) {
+    let N = 6;
+    const out = h("div", {}), tree = h("div", { class: "out", style: "max-height:220px;overflow:auto;font-size:11px" });
+    const calls = n => { const a = [1, 1]; for (let i = 2; i <= n; i++) a[i] = a[i - 1] + a[i - 2] + 1; return a[n]; };
+    const fib = n => { let a = 0, b = 1; for (let i = 0; i < n; i++) [a, b] = [b, a + b]; return a; };
+    function rt(n, d, seen, lines) {
+      if (lines.length > 200) return;
+      const dup = seen.has(n); seen.add(n);
+      lines.push("  ".repeat(d) + `fib(${n})` + (dup ? "   ← recomputed" : ""));
+      if (n > 1) { rt(n - 1, d + 1, seen, lines); rt(n - 2, d + 1, seen, lines); }
+    }
+    const sl = h("input", { type: "range", min: 2, max: 40, value: N });
+    function draw() {
+      out.innerHTML = `<div class="row" style="gap:26px;margin:10px 0"><div><div class="lab">N</div><div class="big">${N}</div></div>
+        <div><div class="lab">Fib&lt;N&gt; value</div><div class="big">${fib(N).toLocaleString()}</div></div>
+        <div><div class="lab">template instantiations</div><div class="big good">${N + 1}</div></div>
+        <div><div class="lab">naive runtime calls</div><div class="big badc">${calls(N).toLocaleString()}</div></div></div>`;
+      const lines = []; rt(Math.min(N, 7), 0, new Set(), lines);
+      tree.textContent = (N > 7 ? `(runtime tree shown for N=7; yours is ${calls(N).toLocaleString()} calls)\n` : "") + lines.join("\n");
+    }
+    sl.addEventListener("input", () => { N = +sl.value; draw(); });
+    el.append(h("p", { class: "hint" }, "Fib<N-1> and Fib<N-2> both need Fib<N-3>, but a class template specialization is instantiated once per translation unit, then reused. the compiler memoizes for free."),
+      codeBlock(C`template<unsigned N> struct Fib { static constexpr unsigned long long value = Fib<N-1>::value + Fib<N-2>::value; };
+template<> struct Fib<1> { static constexpr unsigned long long value = 1; };
+template<> struct Fib<0> { static constexpr unsigned long long value = 0; };`), sl, out, h("div", { class: "lab" }, "naive runtime recursion, for contrast"), tree);
+    draw();
+  }
+};
+
+/* --- policy-based design mixer --- */
+WIDGETS.policy = {
+  title: "policy mixer: SmartPtr<T, Ownership, Checking, Threading>",
+  mount(el) {
+    const O = { RefCounted: ["shares; ++count", "16 (ptr + count*)"], DeepCopy: ["clones the pointee (T must be clonable)", "8"], DestructiveCopy: ["TRANSFERS; source becomes null (auto_ptr's sin)", "8"], NoCopy: ["compile error — copy ctor is not provided", "8"] };
+    const K = { NoCheck: ["UB on null (zero cost)", ""], AssertCheck: ["assert in debug, free in release", "assert(p);"], ThrowOnNull: ["throws; a branch on every ->", "if (!p) throw std::runtime_error(\"null\");"] };
+    const T = { SingleThreaded: "plain ++/--", MultiThreaded: "atomic ++/-- (lock-prefixed RMW, cache-line ping-pong)" };
+    let o = "RefCounted", k = "AssertCheck", t = "SingleThreaded";
+    const out = h("div", {});
+    function draw() {
+      const code = C`template<class T,
+         template<class> class Ownership = RefCounted,
+         class Checking = AssertCheck,
+         class Threading = SingleThreaded>
+class SmartPtr : private Ownership<T>, private Checking {
+  T* p_;
+public:
+  T* operator->() {
+    Checking::check(p_);          // ${K[k][1] || "empty inline fn → compiles to nothing"}
+    return p_;
+  }
+  SmartPtr(const SmartPtr& o)
+    : Ownership<T>(o), p_(Ownership<T>::clone(o.p_)) {}
+};
+
+using WidgetPtr = SmartPtr<Widget, ${o}, ${k}, ${t}>;`;
+      out.replaceChildren(h("div", { class: "col2" }, codeBlock(code),
+        h("div", {}, h("table", { class: "t" },
+          h("tr", {}, h("th", {}, "question"), h("th", {}, "answer for this combo")),
+          h("tr", {}, h("td", {}, "WidgetPtr q = p;"), h("td", { class: o === "NoCopy" ? "badc" : o === "DestructiveCopy" ? "warn" : "" }, O[o][0])),
+          h("tr", {}, h("td", {}, "p->f() when null"), h("td", {}, K[k][0])),
+          h("tr", {}, h("td", {}, "sizeof (approx)"), h("td", {}, O[o][1] + (k === "NoCheck" || true ? "" : ""))),
+          h("tr", {}, h("td", {}, "refcount ops"), h("td", { class: o !== "RefCounted" ? "dim" : t === "MultiThreaded" ? "warn" : "good" }, o === "RefCounted" ? T[t] : "n/a (no count)")),
+          h("tr", {}, h("td", {}, "vector<WidgetPtr> ok?"), h("td", { class: o === "DestructiveCopy" || o === "NoCopy" ? "badc" : "good" }, o === "DestructiveCopy" ? "no — copies that mutate the source break algorithms" : o === "NoCopy" ? "only if movable" : "yes"))),
+          h("p", { class: "muted small" }, `${Object.keys(O).length}×${Object.keys(K).length}×${Object.keys(T).length} = 24 distinct classes from ~10 small policy classes. empty policies cost 0 bytes via empty base optimization.`))));
+    }
+    el.append(h("p", { class: "hint" }, "each axis of variation is a template parameter. the class is assembled at compile time; unused behavior costs nothing."),
+      h("div", { class: "row" }, h("span", { class: "lab" }, "ownership"), seg(Object.keys(O).map(x => [x, x]), o, v => { o = v; draw(); })),
+      h("div", { class: "row", style: "margin-top:6px" }, h("span", { class: "lab" }, "checking"), seg(Object.keys(K).map(x => [x, x]), k, v => { k = v; draw(); })),
+      h("div", { class: "row", style: "margin-top:6px" }, h("span", { class: "lab" }, "threading"), seg(Object.keys(T).map(x => [x, x]), t, v => { t = v; draw(); })),
+      h("div", { style: "margin-top:12px" }, out));
+    draw();
+  }
+};
+
+/* --- expression templates --- */
+WIDGETS.expr = {
+  title: "temporaries vs expression templates",
+  mount(el) {
+    let k = 4, n = 1e6;
+    const out = h("div", {});
+    const sl = h("input", { type: "range", min: 2, max: 8, value: k });
+    sl.addEventListener("input", () => { k = +sl.value; draw(); });
+    function draw() {
+      const names = "abcdefgh".slice(0, k).split("");
+      const naive = { loops: k - 1, allocs: k - 1, traffic: 3 * (k - 1) };
+      const et = { loops: 1, allocs: 1, traffic: k + 1 };
+      const bar = (v, max, c) => `<div style="height:14px;width:${100 * v / max}%;background:${c};border-radius:3px"></div>`;
+      const mx = naive.traffic;
+      out.innerHTML = `<pre class="code">${hl(`Vec r = ${names.join(" + ")};   // each Vec holds n doubles`)}</pre>
+      <div class="col2"><div><div class="lab">naive operator+ returns Vec</div><pre class="code" style="font-size:12px">${hl(names.slice(1).map((x, i) => `${i === k - 2 ? "r   " : "tmp" + (i + 1)} = ${i ? "tmp" + i : "a"} + ${x};  // loop + alloc`).join("\n"))}</pre></div>
+      <div><div class="lab">expression template: operator+ returns Sum&lt;L,R&gt; (no work)</div><pre class="code" style="font-size:12px">${hl(`// type: ${names.slice(1).reduce((acc, x) => `Sum<${acc},Vec>`, "Vec").replace(/Sum<Vec,Vec>/, "Sum<Vec,Vec>")}\nfor (i = 0; i < n; ++i)\n  r[i] = ${names.map(x => x + "[i]").join(" + ")};`)}</pre></div></div>
+      <table class="t"><tr><th></th><th>naive</th><th>expression template</th></tr>
+      <tr><td>passes over memory</td><td>${naive.loops}</td><td class="good">1</td></tr>
+      <tr><td>heap allocations</td><td>${naive.allocs}</td><td class="good">1 (r itself)</td></tr>
+      <tr><td>memory traffic (× n·8B)</td><td>${naive.traffic}${bar(naive.traffic, mx, "var(--red)")}</td><td>${et.traffic}${bar(et.traffic, mx, "var(--teal)")}</td></tr></table>
+      <p class="dim small">for n = 10⁶ that's ${(naive.traffic * 8).toFixed(0)} MB vs ${(et.traffic * 8).toFixed(0)} MB of traffic. at large n you're bandwidth-bound, so traffic ≈ time. (move semantics trims some allocations from the naive version but not the extra passes.)</p>`;
+    }
+    el.append(h("p", { class: "hint" }, "drag the operand count. operator+ can either compute now (temporaries) or return a lightweight node describing the computation, evaluated once on assignment."), sl, out);
+    draw();
+  }
+};
+
+/* --- thread interleaving simulator --- */
+WIDGETS.threads = {
+  title: "you are the scheduler",
+  mount(el, cfg) {
+    const SC = {
+      race: {
+        plain: { lab: "counter++ (plain int)", prog: [["r = counter;", "load"], ["r = r + 1;", "add"], ["counter = r;", "store"]] },
+        mutex: { lab: "lock_guard<mutex>", prog: [["m.lock();", "lock", "m"], ["r = counter;", "load"], ["r = r + 1;", "add"], ["counter = r;", "store"], ["m.unlock();", "unlock", "m"]] },
+        atomic: { lab: "atomic<int>::fetch_add", prog: [["counter.fetch_add(1);", "rmw"]] },
+      },
+      deadlock: {
+        naive: { lab: "lock A then B / B then A", progs: [[["A.lock();", "lock", "A"], ["B.lock();", "lock", "B"], ["/* work */", "nop"], ["B.unlock();", "unlock", "B"], ["A.unlock();", "unlock", "A"]],
+          [["B.lock();", "lock", "B"], ["A.lock();", "lock", "A"], ["/* work */", "nop"], ["A.unlock();", "unlock", "A"], ["B.unlock();", "unlock", "B"]]] },
+        scoped: { lab: "std::scoped_lock lk(A, B);", progs: [[["scoped_lock lk(A, B);", "lockall", "AB"], ["/* work */", "nop"], ["~lk  // unlock both", "unlockall", "AB"]],
+          [["scoped_lock lk(B, A);", "lockall", "AB"], ["/* work */", "nop"], ["~lk  // unlock both", "unlockall", "AB"]]] },
+      }
+    };
+    const kind = cfg.scenario || "race";
+    let mode = Object.keys(SC[kind])[0], s;
+    const view = h("div", {}), ban = h("div", {}), stats = h("div", {});
+    function progs() { const m = SC[kind][mode]; return m.progs || [m.prog, m.prog]; }
+    function reset() { s = { pc: [0, 0], r: [0, 0], counter: 0, own: {}, log: [] }; draw(); }
+    function can(t) {
+      const p = progs()[t]; if (s.pc[t] >= p.length) return false;
+      const [, op, m] = p[s.pc[t]];
+      if (op === "lock") return s.own[m] == null;
+      if (op === "lockall") return [...m].every(x => s.own[x] == null);
+      return true;
+    }
+    function exec(t) {
+      const [, op, m] = progs()[t][s.pc[t]];
+      if (op === "load") s.r[t] = s.counter;
+      if (op === "add") s.r[t]++;
+      if (op === "store") s.counter = s.r[t];
+      if (op === "rmw") s.counter++;
+      if (op === "lock") s.own[m] = t;
+      if (op === "lockall") [...m].forEach(x => s.own[x] = t);
+      if (op === "unlock") s.own[m] = null;
+      if (op === "unlockall") [...m].forEach(x => s.own[x] = null);
+      s.pc[t]++;
+    }
+    const finished = () => progs().every((p, t) => s.pc[t] >= p.length);
+    const stuck = () => !finished() && [0, 1].every(t => !can(t));
+    function step(t) { if (can(t)) { exec(t); draw(); } }
+    function runRandom(N = 1000) {
+      const res = {};
+      for (let i = 0; i < N; i++) {
+        s = { pc: [0, 0], r: [0, 0], counter: 0, own: {} };
+        while (!finished() && !stuck()) { const ready = [0, 1].filter(can); exec(ready[Math.random() * ready.length | 0]); }
+        const key = stuck() ? "DEADLOCK" : kind === "race" ? "counter = " + s.counter : "completed";
+        res[key] = (res[key] || 0) + 1;
+      }
+      reset();
+      stats.innerHTML = `<div class="lab">${N} random schedules</div><table class="t">${Object.entries(res).sort().map(([k, v]) => `<tr><td class="${/DEAD|= 1/.test(k) ? "badc" : "good"}">${k}</td><td>${v}</td><td><div style="height:10px;width:${v / N * 200}px;background:${/DEAD|= 1/.test(k) ? "var(--red)" : "var(--teal)"};border-radius:2px"></div></td></tr>`).join("")}</table>
+        <p class="dim small">real schedulers are far less uniform than this — which is exactly why a 1-in-a-million interleaving survives your test suite and shows up in prod on a monday.</p>`;
+    }
+    function draw() {
+      const ps = progs();
+      view.replaceChildren(h("div", { class: "col2" }, ...[0, 1].map(t => {
+        const blocked = s.pc[t] < ps[t].length && !can(t);
+        return h("div", { class: "thr" }, h("h4", {}, h("span", {}, `thread ${t + 1}`), kind === "race" ? h("span", {}, `r = ${s.r[t]}`) : h("span", {}, "")),
+          ...ps[t].map(([txt], i) => h("div", { class: "ins " + (i < s.pc[t] ? "done" : i === s.pc[t] ? (blocked ? "blk" : "cur") : "") }, txt + (i === s.pc[t] && blocked ? "   ⟵ blocked" : ""))),
+          h("button", { class: "btn sm pri", style: "margin-top:8px", disabled: !can(t), onclick: () => step(t) }, `step T${t + 1}`));
+      })));
+      const own = Object.entries(s.own).filter(([, v]) => v != null).map(([k, v]) => `${k}: held by T${v + 1}`).join(" · ") || "no locks held";
+      ban.replaceChildren(h("div", { class: "out", style: "margin-top:10px" }, kind === "race" ? `memory: counter = ${s.counter}     ${own}` : own));
+      if (finished()) {
+        if (kind === "race") ban.append(h("div", { class: "banner " + (s.counter === 2 ? "ok" : "bad") }, s.counter === 2 ? "counter = 2. correct… this time. can you find a schedule that loses an update?" : "counter = 1. LOST UPDATE. both threads read 0, both wrote 1. a data race on a non-atomic is UB in c++ — this is the *benign-looking* outcome."));
+        else ban.append(h("div", { class: "banner ok" }, "both threads finished. try to find a schedule that wedges them."));
+      } else if (stuck()) ban.append(h("div", { class: "banner bad" }, "DEADLOCK. T1 holds what T2 wants, T2 holds what T1 wants. wait-for graph: T1 → T2 → T1. no timeout, no exception, just a frozen process."));
+    }
+    el.append(h("p", { class: "hint" }, kind === "race" ? "two threads each run counter++ once. you choose who runs next. goal: make counter end at 1." : "two threads need both mutexes. step them. goal: freeze the program."),
+      h("div", { class: "row" }, seg(Object.entries(SC[kind]).map(([k, v]) => [k, v.lab]), mode, v => { mode = v; stats.innerHTML = ""; reset(); }),
+        h("button", { class: "btn sm ghost", onclick: reset }, "reset"), h("button", { class: "btn sm", onclick: () => runRandom() }, "run 1000 random schedules")),
+      h("div", { style: "margin-top:12px" }, view), ban, h("div", { style: "margin-top:10px" }, stats));
+    reset();
+  }
+};
+
+/* --- memory-ordering litmus tests --- */
+WIDGETS.litmus = {
+  title: "litmus tests: which outcomes are allowed?",
+  mount(el) {
+    const T = {
+      SB: {
+        name: "store buffering", t1: ["x.store(1, ORD_S);", "r1 = y.load(ORD_L);"], t2: ["y.store(1, ORD_S);", "r2 = x.load(ORD_L);"],
+        outs: ["r1=0 r2=0", "r1=0 r2=1", "r1=1 r2=0", "r1=1 r2=1"],
+        allowed: { seq_cst: [0, 1, 1, 1], acqrel: [1, 1, 1, 1], relaxed: [1, 1, 1, 1] },
+        why: { seq_cst: "seq_cst = one global order of all seq_cst ops. whichever store is first in that order, the other thread's later load must see it → (0,0) impossible.", acqrel: "acquire/release only orders things relative to a load that READS a release store. here neither load reads the other's store in the (0,0) case, so nothing forbids it. on x86 this is literally the store buffer: each core's store sits in its buffer while its load runs ahead.", relaxed: "relaxed: no ordering between different variables at all." },
+      },
+      MP: {
+        name: "message passing", t1: ["data.store(42, relaxed);", "flag.store(1, ORD_S);"], t2: ["r1 = flag.load(ORD_L);", "r2 = data.load(relaxed);"],
+        outs: ["r1=0 r2=0", "r1=0 r2=42", "r1=1 r2=0", "r1=1 r2=42"],
+        allowed: { seq_cst: [1, 1, 0, 1], acqrel: [1, 1, 0, 1], relaxed: [1, 1, 1, 1] },
+        why: { seq_cst: "seeing flag=1 means you see everything before it.", acqrel: "release store of flag + acquire load that reads it = synchronizes-with. everything T1 did before the release is visible after the acquire. this is THE pattern; you rarely need more than acq/rel.", relaxed: "relaxed flag: seeing flag=1 promises nothing about data. arm/power will happily show you (1,0). x86 usually won't — which is how relaxed bugs pass tests on your laptop." },
+      }
+    };
+    let t = "SB", o = "seq_cst", picks = new Set(), revealed = false;
+    const view = h("div", {});
+    function sub(x) { const m = { seq_cst: ["seq_cst", "seq_cst"], acqrel: ["release", "acquire"], relaxed: ["relaxed", "relaxed"] }[o]; return x.replace("ORD_S", m[0]).replace("ORD_L", m[1]); }
+    function interleavings() {
+      // enumerate SC interleavings for display
+      const A = T[t].t1, B = T[t].t2, res = [];
+      const rec = (i, j, seq) => { if (i === 2 && j === 2) return res.push(seq); if (i < 2) rec(i + 1, j, seq.concat(["T1:" + i])); if (j < 2) rec(i, j + 1, seq.concat(["T2:" + j])); };
+      rec(0, 0, []); return res.length;
+    }
+    function draw() {
+      const L = T[t];
+      view.replaceChildren(
+        h("div", { class: "col2" }, h("div", {}, h("div", { class: "lab" }, "thread 1"), codeBlock(L.t1.map(sub).join("\n"))), h("div", {}, h("div", { class: "lab" }, "thread 2"), codeBlock(L.t2.map(sub).join("\n")))),
+        h("p", { class: "small muted" }, "all variables start at 0. tick every outcome you think is ALLOWED, then check."),
+        h("div", { class: "row" }, ...L.outs.map((x, i) => {
+          const allowed = L.allowed[o][i];
+          const lab = tog(x + (revealed ? (allowed ? "  ✓ allowed" : "  ✗ forbidden") : ""), picks.has(i), v => { v ? picks.add(i) : picks.delete(i); });
+          if (revealed) lab.style.borderColor = (picks.has(i) === !!allowed) ? "var(--teal)" : "var(--red)";
+          return lab;
+        })),
+        h("div", { class: "row", style: "margin-top:10px" }, h("button", { class: "btn sm pri", onclick: () => { revealed = true; draw(); } }, "check"), h("button", { class: "btn sm ghost", onclick: () => { revealed = false; picks.clear(); draw(); } }, "clear")),
+        revealed ? h("div", { class: "banner " + (L.outs.every((_, i) => picks.has(i) === !!L.allowed[o][i]) ? "ok" : "bad") },
+          (L.outs.every((_, i) => picks.has(i) === !!L.allowed[o][i]) ? "exactly right. " : "not quite — green border = you got that one right, red = wrong. ") + L.why[o] +
+          ` (there are ${interleavings()} sequentially-consistent interleavings of 2+2 ops; weaker orders add outcomes NO interleaving can explain.)`) : "");
+    }
+    el.append(h("p", { class: "hint" }, "the two classic litmus tests. the question isn't 'what happens' — it's 'what is the compiler+cpu ALLOWED to make happen'."),
+      h("div", { class: "row" }, seg([["SB", "store buffering"], ["MP", "message passing"]], t, v => { t = v; revealed = false; picks.clear(); draw(); }),
+        seg([["seq_cst", "seq_cst"], ["acqrel", "release/acquire"], ["relaxed", "relaxed"]], o, v => { o = v; revealed = false; picks.clear(); draw(); })),
+      h("div", { style: "margin-top:12px" }, view));
+    draw();
+  }
+};
+
+/* --- amdahl --- */
+WIDGETS.amdahl = {
+  title: "amdahl's law",
+  mount(el) {
+    let p = .9, n = 8;
+    const sp = h("input", { type: "range", min: 0, max: 100, value: 90 }), sn = h("input", { type: "range", min: 1, max: 128, value: 8 });
+    const out = h("div", {}), svg = h("div", {});
+    const S = (p, n) => 1 / ((1 - p) + p / n);
+    function draw() {
+      out.innerHTML = `<div class="row" style="gap:26px;margin:10px 0"><div><div class="lab">parallel fraction p</div><div class="big">${Math.round(p * 100)}%</div></div>
+      <div><div class="lab">cores n</div><div class="big">${n}</div></div><div><div class="lab">speedup</div><div class="big warn">${S(p, n).toFixed(2)}×</div></div>
+      <div><div class="lab">ceiling (n→∞)</div><div class="big badc">${p < 1 ? (1 / (1 - p)).toFixed(1) + "×" : "∞"}</div></div><div><div class="lab">efficiency</div><div class="big">${Math.round(100 * S(p, n) / n)}%</div></div></div>`;
+      const W = 520, H = 160, mx = 128, my = Math.min(64, Math.max(4, p < 1 ? 1 / (1 - p) * 1.15 : 64));
+      const pts = Array.from({ length: mx }, (_, i) => `${(i / (mx - 1)) * W},${H - Math.min(H, S(p, i + 1) / my * H)}`).join(" ");
+      const ideal = `0,${H - 1 / my * H} ${Math.min(W, (my - 1) / (mx - 1) * W)},0`;
+      svg.innerHTML = `<svg viewBox="-30 -8 ${W + 40} ${H + 26}" style="width:100%;max-width:600px">
+        <line x1="0" y1="${H}" x2="${W}" y2="${H}" stroke="#33404f"/><line x1="0" y1="0" x2="0" y2="${H}" stroke="#33404f"/>
+        <polyline points="${ideal}" fill="none" stroke="#6b7684" stroke-dasharray="4 4"/>
+        <polyline points="${pts}" fill="none" stroke="#f0b23e" stroke-width="2.5"/>
+        <circle cx="${(n - 1) / (mx - 1) * W}" cy="${H - S(p, n) / my * H}" r="5" fill="#5ec8b8"/>
+        <text x="${W}" y="${H + 16}" fill="#6b7684" font-size="10" text-anchor="end" font-family="monospace">cores → 128</text>
+        <text x="-6" y="6" fill="#6b7684" font-size="10" text-anchor="end" font-family="monospace">${my.toFixed(0)}×</text>
+        <text x="40" y="12" fill="#6b7684" font-size="10" font-family="monospace">dashed = linear (ideal)</text></svg>`;
+    }
+    sp.addEventListener("input", () => { p = sp.value / 100; draw(); }); sn.addEventListener("input", () => { n = +sn.value; draw(); });
+    el.append(h("p", { class: "hint" }, "speedup = 1 / ((1−p) + p/n). set p = 95% and drag cores to 128. then ask what the serial 5% is in your code (allocation? a lock? i/o?)."),
+      h("div", { class: "col2" }, h("div", {}, h("div", { class: "lab" }, "p"), sp), h("div", {}, h("div", { class: "lab" }, "n"), sn)), out, svg);
+    draw();
+  }
+};
+
+/* ================= TRACK A: THE OBJECT ================= */
+track({ id: "01 // the object", title: "the object", desc: "what a class *is* in memory: lifetime, layout, dispatch, and the members the compiler writes for you." });
+
+lesson({
+  id: "lifetime", title: "lifetime & raii", widgetLabel: "stepper",
+  src: ["c++: the core language · ch 6 ctors & dtors", "inside the c++ object model · ch 5–6", "boost c++ libraries · ch 3 memory & exception safety"],
+  hook: "c++ has no `finally`, no garbage collector, and almost never leaks in well-written code. **how?** the answer is a scheduling guarantee you get for free on every closing brace.",
+  beats: [
+    { t: "p", h: "an object's lifetime is a closed interval: it begins when its constructor *finishes*, ends when its destructor *starts*. for automatic (stack) objects, the compiler schedules the destructor call at scope exit — on every path out: normal `}`, `return`, `break`, or an exception unwinding through." },
+    { t: "p", h: "construction is built bottom-up, destruction exactly mirrors it: **bases first, then members in declaration order, then the constructor body.** destruction runs the reverse. locals in a scope die in reverse order of declaration." },
+    {
+      t: "w", id: "stepper", cfg: {
+        code: C`struct Log { std::string n;
+  Log(std::string s) : n(s) { say(n + "()"); }
+  ~Log()                    { say("~" + n + "()"); } };
+
+struct Base { Log b{"Base.b"};
+  Base()  { say("Base body"); }
+  ~Base() { say("~Base body"); } };
+
+struct Widget : Base {
+  Log m1{"m1"};
+  Log m2{"m2"};
+  Widget()  { say("Widget body"); }
+  ~Widget() { say("~Widget body"); } };
+
+int main() {
+  Log a{"a"};
+  Widget w;
+}`, steps: [
+          { l: [17], log: "a()", note: "locals construct in order of appearance." },
+          { l: [10, 5], log: "Base.b()", note: "constructing `w`: the base subobject comes first, and *its* members come before *its* body." },
+          { l: [6], log: "Base body", note: "base ctor body runs after base's members." },
+          { l: [11], log: "m1()", note: "now Widget's members — in DECLARATION order, regardless of how you order the mem-init list." },
+          { l: [12], log: "m2()" },
+          { l: [13], log: "Widget body", note: "the body runs last. by now every subobject is alive, so the body can use them." },
+          { l: [19], log: "~Widget body", note: "closing brace. `w` was declared last, so it dies first. destructor body runs FIRST in destruction…" },
+          { l: [12], log: "~m2()", note: "…then members in reverse declaration order…" },
+          { l: [11], log: "~m1()" },
+          { l: [7], log: "~Base body", note: "…then the base: body first, then its members." },
+          { l: [5], log: "~Base.b()" },
+          { l: [17], log: "~a()", note: "finally `a`. perfect mirror image. this determinism is what RAII is built on." },
+        ]
+      }
+    },
+    { t: "p", h: "**raii** = resource acquisition is initialization: tie each resource (memory, file, lock, socket, transaction) to an object whose destructor releases it. then the compiler's scheduling guarantee *becomes* your cleanup guarantee — even on exceptions." },
+    { t: "code", c: C`void bad(std::mutex& m) {
+  m.lock();
+  risky();        // throws → m stays locked forever
+  m.unlock();
+}
+void good(std::mutex& m) {
+  std::lock_guard<std::mutex> g(m);   // ctor locks
+  risky();                            // throws → g's dtor unlocks during unwinding
+}`, cap: "the whole idea in 9 lines" },
+    {
+      t: "q", code: C`struct A { A(){ std::cout << "A"; } ~A(){ std::cout << "~A"; } };
+struct B { B(){ std::cout << "B"; throw 1; } ~B(){ std::cout << "~B"; } };
+struct C { A a; B b; };
+int main() { try { C c; } catch (int) { std::cout << " caught"; } }`,
+      q: "what prints?", o: ["`AB~B~A caught`", "`AB~A caught`", "`AB caught`", "`AB~A~B caught`"], a: 1,
+      why: "B's constructor never finished, so B's lifetime never began → no ~B. but `a` was fully constructed, so the partially-built C unwinds it: ~A runs. C's own destructor does NOT run (C never finished either). this is why each resource should be owned by its own member, not by C's body."
+    },
+    { t: "edge", h: "a destructor that throws during stack unwinding (i.e. while another exception is in flight) calls `std::terminate`. since c++11 destructors are implicitly `noexcept`, so *any* throw out of a destructor terminates unless you opt out. don't." },
+    {
+      t: "q", code: C`struct Mem { int x; Mem(int v) : x(v) {} };
+struct S {
+  Mem a, b;
+  S() : b(1), a(b.x + 1) {}
+};`, q: "what's `a.x` after `S s;`?", o: ["2", "1", "garbage: reads b before b is constructed (UB)", "compile error"], a: 2,
+      why: "members are initialized in DECLARATION order (a, then b), not mem-init-list order. so `a(b.x + 1)` reads `b` before its lifetime begins. gcc/clang warn with -Wreorder; your code review should not need the warning."
+    },
+    { t: "rule", h: "declare members in the order they depend on each other, and write the mem-init list in the same order. treat -Wreorder as an error." },
+    { t: "recall", q: "state the complete construction order for a derived class with members, and why destruction is the exact reverse.", a: "bases (in declaration order, recursively — each base's own bases, members, body), then members in declaration order, then the ctor body. destruction reverses it so that every subobject is still alive while anything that might depend on it is being torn down — a member can rely on bases; the body can rely on all members." },
+  ],
+  cards: [
+    ["when does an object's lifetime begin and end?", "begins when its constructor completes; ends when its destructor starts. a ctor that throws means the object never existed → its dtor never runs."],
+    ["in what order are members initialized?", "declaration order in the class — NOT the order of the mem-init list."],
+    ["what does RAII buy you that try/finally doesn't?", "cleanup is bound to the type, not to each call site; it runs on every exit path including exceptions; it composes (members of members) with zero extra code."],
+    ["why are destructors implicitly noexcept, and what happens if one throws during unwinding?", "throwing while another exception is propagating can't be handled → std::terminate. c++11 made dtors noexcept by default so any throw terminates immediately."],
+    ["if member b's ctor throws while constructing object c (members a, b), which dtors run?", "only ~a (a was fully constructed). not ~b, not ~C."],
+  ]
+});
+
+lesson({
+  id: "layout", title: "layout, padding & size", widgetLabel: "layout lab",
+  src: ["inside the c++ object model · ch 1, 3 data semantics", "c++ high performance · ch 4 data structures, ch 7 memory"],
+  hook: "`struct { char a; int b; char c; }` holds 6 bytes of data. `sizeof` says 12. **where did the other 6 go — and why would the compiler do that to you?**",
+  beats: [
+    { t: "p", h: "every type has an **alignment**: its address must be a multiple of it. an `int` (4) can't start at address 1. so the compiler inserts **padding** between members to align the next one, and at the end so that in an *array* of structs, element `[1]` is aligned too." },
+    { t: "p", h: "c++ forbids reordering members (with the same access level) — declaration order is address order. so the layout is *your* decision, and the compiler pads around it. the object-model book's point: a C struct and a c++ class with non-virtual member functions have identical layout. functions aren't stored in objects. what costs bytes is data, padding, and virtual machinery." },
+    { t: "w", id: "layout", cfg: { init: [["char", "a"], ["int", "b"], ["char", "c"], ["double", "d"], ["bool", "e"]] } },
+    { t: "rule", h: "sort members by alignment, largest first. it's not always optimal, but it's always ≤ the original and usually zero-pad." },
+    {
+      t: "q", q: "`struct S { double d; char c; };` — what is `sizeof(S[2])`?", o: ["18", "9", "32", "16"], a: 2,
+      why: "sizeof(S) = 8 + 1 + 7 tail padding = 16. tail padding exists precisely so arrays work: S[1].d must sit on an 8-byte boundary. 2 × 16 = 32."
+    },
+    {
+      t: "q", code: C`struct Empty {};
+struct A { Empty e; int x; };
+struct B : Empty { int x; };`, q: "sizeof(Empty), sizeof(A), sizeof(B)?", o: ["0, 4, 4", "1, 8, 4", "1, 5, 5", "1, 8, 8"], a: 1,
+      why: "an empty class has size 1 (distinct objects need distinct addresses). as a *member* it occupies 1 byte, then int needs 3 bytes pad → 8. as a *base*, the empty base optimization lets it take zero bytes → 4. this is why policy classes and allocators/deleters are inherited (or marked [[no_unique_address]] in c++20) rather than stored as members."
+    },
+    { t: "edge", h: "adding *one* virtual function adds a vptr (8 bytes on 64-bit) to every object and makes the class non-trivially-copyable — no more memcpy, no more `std::is_trivial`. toggle 'has virtual fn' in the lab and look what happens to a `struct { char c; }`." },
+    {
+      t: "q", q: "you have 10 million `struct { bool alive; double x; bool dirty; double y; }`. what's the cheapest win?", o: ["mark it packed", "reorder to doubles first: 32 → 24 bytes, 25% less memory traffic", "use float", "it's already optimal"], a: 1,
+      why: "8+8+8+8 = 32 with padding after each bool. reordered: 8+8+1+1+6 tail = 24. #pragma pack would make 18 but creates misaligned double loads (slow on some cpus, UB-ish via references, breaks atomics). reorder first, pack never (unless it's a wire format)."
+    },
+    { t: "recall", q: "why does tail padding exist, and what would break without it?", a: "so that sizeof(T) is a multiple of alignof(T). arrays are contiguous with stride sizeof(T); without tail padding, element [1] would be misaligned." },
+  ],
+  cards: [
+    ["what is alignment and who decides it?", "the address multiple a type must start on. the ABI decides per type (int: 4, double: 8 on x86-64). alignof(T) tells you."],
+    ["why is sizeof an empty class 1?", "two distinct objects must have distinct addresses; size 0 would break arrays and pointer identity."],
+    ["what is the empty base optimization?", "an empty base class subobject can occupy zero bytes. members can't (pre-c++20), so stateless policies/deleters/allocators are inherited or [[no_unique_address]]."],
+    ["cheapest rule to minimize padding?", "order members by decreasing alignment."],
+    ["what does adding the first virtual function cost per object?", "a vptr (8 bytes on 64-bit), plus losing trivial copyability."],
+  ]
+});
+
+lesson({
+  id: "vtable", title: "virtual dispatch, for real", widgetLabel: "vtable explorer",
+  src: ["inside the c++ object model · ch 4 function semantics, ch 5", "c++: the core language · ch 12–13 polymorphism"],
+  hook: "`p->f()` — the compiler doesn't know which `f` you mean. at runtime, nothing stores a type name. **so what, physically, picks the function?**",
+  beats: [
+    { t: "p", h: "each polymorphic class gets one static table of function pointers: the **vtable**. each object gets a hidden pointer to its class's table: the **vptr**. a virtual call compiles to: load vptr, load slot *k*, call indirectly. the slot index is fixed at compile time from the *static* type; which table you land in depends on the *dynamic* type." },
+    { t: "w", id: "vtable" },
+    { t: "p", h: "the constructor of each class sets the vptr to *its own* vtable, before running its body. so during `Base::Base()` the object really *is* a Base — the Derived part hasn't been built. calling a virtual from a constructor dispatches to the Base version. this isn't a bug; the alternative would be calling a Derived method on uninitialized Derived members." },
+    {
+      t: "q", code: C`struct B {
+  B() { hello(); }
+  virtual void hello() { std::cout << "B"; }
+};
+struct D : B {
+  std::string s = "D";
+  void hello() override { std::cout << s; }
+};
+int main() { D d; d.hello(); }`, q: "output?", o: ["`DD`", "`BD`", "`BB`", "crash"], a: 1,
+      why: "inside B() the vptr points to B's vtable → B::hello. after D() finishes, the vptr points to D's → D::hello. (if B::hello were pure virtual, the call from the ctor is UB and typically aborts with 'pure virtual method called'.)"
+    },
+    {
+      t: "q", code: C`struct B { virtual void f(int x = 1) { std::cout << "B" << x; } };
+struct D : B { void f(int x = 2) override { std::cout << "D" << x; } };
+int main() { B* p = new D; p->f(); }`, q: "output?", o: ["`D2`", "`D1`", "`B1`", "`B2`"], a: 1,
+      why: "the function is chosen dynamically (D::f), but default arguments are a compile-time substitution based on the STATIC type (B*) → x = 1. never redefine default args in overrides."
+    },
+    {
+      t: "q", code: C`struct Base { ~Base() { /* ... */ } virtual void f(); };
+struct Derived : Base { std::vector<int> v; };
+Base* p = new Derived;
+delete p;`, q: "what happens?", o: ["fine — Derived's vector is freed", "undefined behavior", "compile error", "leaks v but otherwise fine"], a: 1,
+      why: "deleting through a base pointer whose destructor isn't virtual is UB, period — not 'just a leak'. in practice ~Derived is skipped (v leaks) and if Base isn't the first subobject, the wrong address is freed. rule: polymorphic base → public virtual dtor, or protected non-virtual dtor."
+    },
+    {
+      t: "q", code: C`struct Animal { virtual std::string name() const { return "animal"; } };
+struct Cat : Animal { std::string name() const override { return "cat"; } };
+void show(Animal a) { std::cout << a.name(); }
+int main() { Cat c; show(c); }`, q: "output?", o: ["`cat`", "`animal`", "compile error", "UB"], a: 1,
+      why: "slicing. pass-by-value copy-constructs an Animal from the Animal part of c. the new object's vptr is Animal's. polymorphism lives only behind pointers and references."
+    },
+    { t: "edge", h: "the real cost of `virtual` isn't the two loads — those hit L1. it's that the compiler can't **inline** through an indirect call, so it can't vectorize, constant-fold, or hoist across it. in a hot loop over a million objects, that's the difference. `final` on the class or method lets the compiler devirtualize." },
+    { t: "recall", q: "explain what `p->f()` compiles to when f is virtual, and which part depends on the static vs dynamic type.", a: "static type (via name lookup) picks *which* virtual function and thus the vtable slot index, and the default args. at runtime: load p's vptr (set by the dynamic type's constructor), index the slot, indirect call with this=p." },
+  ],
+  cards: [
+    ["what is a vptr and who sets it?", "hidden per-object pointer to the class's vtable. each constructor in the chain sets it to its own class's vtable before its body runs."],
+    ["calling a virtual function from a base constructor dispatches to…?", "the base's version — the derived part doesn't exist yet. (pure virtual → UB.)"],
+    ["are default arguments of virtual functions dynamic?", "no — they're bound statically from the pointer/reference's static type."],
+    ["when must a destructor be virtual?", "whenever an object may be deleted through a pointer to a base. otherwise UB. alternative: make the base dtor protected and non-virtual."],
+    ["what is slicing?", "copying a derived object into a base object by value — only the base part is copied and the vptr is the base's."],
+    ["why can `virtual` be slow beyond the indirect call itself?", "it blocks inlining, which blocks every optimization that follows inlining (vectorization, constant propagation)."],
+  ]
+});
+
+lesson({
+  id: "specials", title: "the special members", widgetLabel: "generation rules",
+  src: ["effective modern c++ · item 17", "c++: the core language · ch 9–10 copy & assign", "inside the c++ object model · ch 2 ctor semantics"],
+  hook: "you add a destructor that logs something. your class's moves silently become copies, and your hot path is 4× slower. **no warning. why?**",
+  beats: [
+    { t: "p", h: "six members the compiler may write for you: default ctor, copy ctor, copy assign, move ctor, move assign, dtor. the rules for when it does are *declaration-driven*: declaring one — even as `= default` — suppresses or deletes others." },
+    { t: "w", id: "specials" },
+    { t: "p", h: "the logic: if you wrote a destructor or a copy operation, you're signalling that memberwise behavior *might* be wrong for this class. the committee didn't dare auto-generate moves for such classes (would break c++98 code), so moves are not declared — and rvalues fall back to the copy constructor because `const X&` binds to rvalues." },
+    { t: "rule", h: "**rule of zero:** don't declare any of them; hold resources in members that manage themselves (unique_ptr, vector, string). **rule of five:** if you must declare one, declare all five explicitly (`= default` is fine)." },
+    {
+      t: "q", code: C`struct Buf {
+  std::vector<char> data;
+  ~Buf() { std::cout << "bye\n"; }
+};
+Buf make();
+Buf b = make();   // assume no copy elision for argument's sake
+Buf c = std::move(b);`, q: "what does the last line do to `data`?", o: ["moves it (cheap)", "copies it — the user-declared dtor suppressed the implicit move ctor", "compile error: move ctor deleted", "moves it, but warns"], a: 1,
+      why: "user-declared destructor → no implicit move ctor. the copy ctor is still implicitly generated (deprecated), and `std::move(b)` (an xvalue Buf) binds to `const Buf&`. full deep copy, silently. fix: add `Buf(Buf&&) = default; Buf& operator=(Buf&&) = default;` (and then the copies get deleted — add those too)."
+    },
+    {
+      t: "q", code: C`struct P {
+  std::string s;
+  P() = default;
+  P(P&&) = default;
+};
+P a;
+P b = a;`, q: "what happens on the last line?", o: ["copies s", "error: P's copy constructor is deleted", "moves from a", "shallow copy"], a: 1,
+      why: "declaring a move operation (even `= default`) makes the implicit copy ctor and copy assign *deleted*. note we also had to write `P() = default;` — declaring any constructor (including the move ctor) suppresses the implicit default ctor."
+    },
+    { t: "edge", h: "a template constructor `template<class T> X(const T&)` is **never** a copy constructor. the compiler still generates the real copy ctor, and for a non-const lvalue argument, overload resolution may prefer your template anyway (better match). this one shows up again in the forwarding lesson." },
+    { t: "recall", q: "you declare only a destructor. which of the five other special members exist, and in what state?", a: "default ctor: yes (if no other ctor). copy ctor & copy assign: implicitly defaulted (deprecated). move ctor & move assign: NOT declared → moves become copies." },
+  ],
+  cards: [
+    ["what suppresses the implicit move constructor?", "a user-declared copy ctor, copy assign, move assign, or destructor."],
+    ["what happens to the implicit copy operations if you declare a move operation?", "they're defined as deleted."],
+    ["why do rvalues 'move' via the copy ctor when no move ctor exists?", "const T& binds to rvalues, so overload resolution finds the copy ctor. no error, just a silent copy."],
+    ["rule of zero vs rule of five?", "zero: declare none; compose from self-managing members. five: if you declare any of dtor/copy/move, declare all five."],
+    ["is a template constructor ever a copy constructor?", "no. the real copy ctor is still implicitly generated."],
+  ]
+});
+
+/* ================= TRACK B: MODERN CORE ================= */
+track({ id: "02 // modern core", title: "modern core", desc: "deduction, value categories, ownership, closures — the c++11/14/17 machinery everything else assumes." });
+
+lesson({
+  id: "deduce", title: "type deduction", widgetLabel: "deduction sim",
+  src: ["effective modern c++ · items 1–4", "c++ high performance · ch 2 auto"],
+  hook: "`auto x = cx;` where `cx` is `const int`. is `x` const? **if you hesitated, every `auto` you write is a guess.**",
+  beats: [
+    { t: "p", h: "`auto` deduction *is* template deduction (one exception, below). given `template<class T> void f(PARAM)` and a call `f(expr)`, the compiler pattern-matches expr's type against PARAM and solves for T. there are only three shapes to know: by-value `T`, reference `T&`/`const T&`, and forwarding `T&&`." },
+    { t: "w", id: "deduce" },
+    { t: "p", h: "the mental model: **by-value means a new object**, so the arg's top-level `const` and reference-ness are irrelevant and dropped; arrays and functions decay. **by-reference means an alias**, so const must be preserved (else you could modify a const through it). **forwarding refs** encode the value category of the argument into T itself." },
+    {
+      t: "q", code: C`const int cx = 0;
+const int* const p = &cx;
+auto a = p;`, q: "type of `a`?", o: ["`const int* const`", "`const int*`", "`int*`", "`int* const`"], a: 1,
+      why: "by-value drops TOP-level const (the pointer's own constness — the copy is a new pointer). the low-level const (what it points to) is part of the type being copied and stays."
+    },
+    {
+      t: "q", code: C`auto a = {1, 2, 3};
+auto b{42};
+auto c = {42};`, q: "types of a, b, c (c++17)?", o: ["initializer_list<int>, int, initializer_list<int>", "initializer_list<int>, initializer_list<int>, int", "error, int, int", "all initializer_list<int>"], a: 0,
+      why: "the one place auto differs from templates: `auto x = {…}` deduces std::initializer_list. c++17 (N3922) changed direct-list-init `auto b{42}` to plain int. templates can't deduce from a braced list at all."
+    },
+    {
+      t: "q", code: C`int x = 0;
+decltype(x)   a = x;
+decltype((x)) b = x;
+b = 5;`, q: "value of x afterwards?", o: ["0", "5", "compile error", "UB"], a: 1,
+      why: "decltype(name) gives the declared type: int. decltype(expression) gives T& for lvalue expressions — and `(x)` is an expression, not a name. so b is int&. this bites with `decltype(auto)` return types: `return (local);` returns a dangling reference."
+    },
+    { t: "edge", h: "`std::vector<bool> v; auto b = v[0];` — `b` is NOT a bool. it's `std::vector<bool>::reference`, a proxy into the bit array. destroy `v` and `b` dangles. invisible proxy types (also in expression-template libraries like eigen) are where `auto` lies to you. fix: `auto b = static_cast<bool>(v[0]);`." },
+    { t: "recall", q: "for `template<class T> void f(T&& p)`, what is T when called with an lvalue int, and with an rvalue int? why does that matter?", a: "lvalue → T = int& (param collapses to int&). rvalue → T = int (param int&&). T thus *remembers* the value category, which std::forward<T> uses to restore it." },
+  ],
+  cards: [
+    ["by-value deduction (T / auto) drops what?", "references, top-level const/volatile. arrays/functions decay to pointers."],
+    ["by-reference deduction (T& / auto&) preserves what?", "const-ness of the referred object; arrays stay arrays (T = U[N])."],
+    ["the one difference between auto and template deduction?", "auto x = {…} deduces std::initializer_list<T>; templates can't deduce from braced lists."],
+    ["decltype(x) vs decltype((x))?", "name → declared type. parenthesized → an lvalue expression → T&."],
+    ["why can `auto` be wrong with vector<bool>?", "operator[] returns a proxy object; auto deduces the proxy, which can dangle."],
+  ]
+});
+
+lesson({
+  id: "move", title: "move semantics", widgetLabel: "vector lab",
+  src: ["effective modern c++ · items 23, 25, 29, 41", "c++ high performance · ch 2 move semantics", "boost c++ libraries · appendix move emulation"],
+  hook: "`std::move` doesn't move anything. it compiles to **zero instructions**. so where does the move happen — and why does a missing `noexcept` turn your moves back into copies?",
+  beats: [
+    { t: "p", h: "`std::move(x)` is a cast: `static_cast<T&&>(x)`. it changes the *value category* of the expression from lvalue to xvalue, so overload resolution picks the `T&&` overload (move ctor/assign) instead of `const T&`. the move constructor is what moves — usually by stealing pointers and nulling the source." },
+    { t: "code", c: C`class Buf {
+  char* p_; size_t n_;
+public:
+  Buf(Buf&& o) noexcept : p_(o.p_), n_(o.n_) {   // steal
+    o.p_ = nullptr; o.n_ = 0;                     // leave source valid-but-empty
+  }
+};` },
+    { t: "p", h: "now the vector problem. when `push_back` must reallocate, it relocates every element. if a move throws halfway, the old buffer is half-gutted and the strong exception guarantee is gone. so vector uses `std::move_if_noexcept`: **move only if the move ctor is `noexcept` (or there's no copy ctor); otherwise copy.**" },
+    { t: "w", id: "vecgrow" },
+    {
+      t: "q", code: C`const std::string s = "a very long string that won't fit in sso";
+std::string t = std::move(s);`, q: "what does line 2 do?", o: ["moves; s is now empty", "copies; s is unchanged", "compile error", "UB"], a: 1,
+      why: "std::move(s) yields `const std::string&&`. the move ctor takes `std::string&&` (non-const — it must modify the source), so it can't bind. `const std::string&` can → copy. no warning. moving from const is always a copy."
+    },
+    {
+      t: "q", code: C`void sink(std::string&& s) {
+  std::string mine = s;   // (*)
+}`, q: "line (*) does what?", o: ["move", "copy", "error", "depends on the caller"], a: 1,
+      why: "s has type rvalue-reference-to-string, but `s` the expression is an lvalue — it has a name. anything with a name is an lvalue. you need `std::move(s)` to move from it."
+    },
+    {
+      t: "q", code: C`std::string make() {
+  std::string r = build();
+  return std::move(r);
+}`, q: "is `std::move` here helpful?", o: ["yes — guarantees a move", "no — it disables NRVO, so you get a move where you'd have had zero operations", "no difference", "it's UB"], a: 1,
+      why: "returning a local by name is eligible for NRVO (construct directly in the caller's slot) and is implicitly treated as an rvalue anyway if elision doesn't happen. `std::move(r)` is an expression, not a name → no elision → you force a move. clang warns: -Wpessimizing-move."
+    },
+    { t: "edge", h: "a moved-from standard library object is in a 'valid but unspecified state'. you may destroy it, assign to it, or call functions without preconditions (`clear()`, `size()`). you may not assume it's empty — sso strings often *copy* the short buffer and leave the source as-is." },
+    { t: "rule", h: "mark move constructors and move assignment `noexcept` (they almost never allocate). `= default` ones get it automatically when all members' moves are noexcept." },
+    { t: "recall", q: "why does std::vector copy elements on reallocation when the element's move ctor isn't noexcept?", a: "to preserve the strong exception guarantee: if a copy throws mid-relocation, the original buffer is untouched and can be kept. a throwing move would have already destroyed source elements, so the vector couldn't roll back." },
+  ],
+  cards: [
+    ["what does std::move actually do?", "an unconditional cast to an rvalue reference (xvalue). no code runs. the move ctor/assign does the moving."],
+    ["moving from a const object does what?", "copies — const T&& can't bind to T&&, but binds to const T&."],
+    ["is a named rvalue reference an lvalue or rvalue?", "lvalue. if it has a name, it's an lvalue."],
+    ["why mark move constructors noexcept?", "vector (and others) use move_if_noexcept during reallocation; without noexcept they copy."],
+    ["should you `return std::move(local);`?", "no — it defeats NRVO. return the name."],
+    ["what can you do with a moved-from std object?", "destroy, assign, or call functions with no preconditions. don't assume empty."],
+  ]
+});
+
+lesson({
+  id: "forward", title: "forwarding references", widgetLabel: "collapsing",
+  src: ["effective modern c++ · items 24–28, 30", "c++ concurrency in action · appendix a.1"],
+  hook: "`T&&` sometimes means rvalue reference and sometimes means 'anything at all'. **the syntax is identical. how do you tell, and why does it matter for every factory you write?**",
+  beats: [
+    { t: "p", h: "`T&&` is a **forwarding reference** only when T is being *deduced* right there, in exactly the form `T&&` (or `auto&&`). `std::vector<T>&&`, `const T&&`, or `T&&` in a class template's member where T was fixed earlier — all plain rvalue references." },
+    { t: "w", id: "collapse" },
+    { t: "p", h: "`std::forward<T>(x)` is a *conditional* cast: if T is non-reference (caller passed an rvalue), cast to rvalue; if T is `U&` (caller passed an lvalue), the collapse yields `U&` and nothing changes. that's how `make_unique<T>(args...)` passes each arg exactly as received." },
+    { t: "code", c: C`template<class T, class... Args>
+std::unique_ptr<T> make(Args&&... args) {
+  return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
+}` },
+    {
+      t: "q", q: "which of these is a forwarding reference?", o: ["`template<class T> void f(std::vector<T>&& v);`", "`template<class T> void f(const T&& v);`", "`template<class T> struct W { void f(T&& v); };`", "`auto&& r = g();`"], a: 3,
+      why: "auto&& deduces, in the exact `X&&` form. vector<T>&& isn't the bare form. const T&& isn't either. in W<T>::f, T was fixed when W was instantiated — no deduction at the call."
+    },
+    {
+      t: "q", code: C`struct Person {
+  std::string name;
+  template<class T> Person(T&& n) : name(std::forward<T>(n)) {}
+  Person(const Person&) = default;
+};
+Person p("ann");
+Person q(p);`, q: "what happens on the last line?", o: ["copy ctor is called", "the template is chosen with T = Person& → tries to build std::string from a Person → compile error", "ambiguous call", "move ctor"], a: 1,
+      why: "p is a non-const lvalue. the template instantiates as Person(Person&) — exact match. the copy ctor needs a const conversion. exact beats conversion → the template hijacks copying. fix: constrain it (`requires (!std::is_same_v<std::remove_cvref_t<T>, Person>)`)."
+    },
+    { t: "edge", h: "perfect forwarding isn't perfect: braced init lists (`f({1,2})` can't deduce), `0`/`NULL` as null pointers (deduce int), declaration-only `static const` members (need a definition to bind a ref — pre-c++17), overloaded function names, and bitfields (can't bind a reference to a bit) all fail to forward." },
+    { t: "recall", q: "what are the two conditions for `T&&` to be a forwarding reference?", a: "(1) T is deduced at that call, (2) the form is exactly T&& (or auto&&) — no const, no wrapping template." },
+  ],
+  cards: [
+    ["reference collapsing rule?", "if either reference is &, result is &. only && + && gives &&."],
+    ["std::move vs std::forward?", "move: unconditional cast to rvalue. forward<T>: casts to rvalue only if T is a non-reference (the arg was an rvalue)."],
+    ["is `std::vector<T>&&` a forwarding reference?", "no — only the bare `T&&` form with T deduced at the call."],
+    ["why is overloading on a forwarding reference dangerous?", "it's an exact match for almost everything, so it hijacks calls — e.g. copying a non-const lvalue picks the template over the copy ctor."],
+    ["name three things that break perfect forwarding.", "braced initializers, 0/NULL as null pointers, overloaded function names (also: bitfields, undefined static const members)."],
+  ]
+});
+
+lesson({
+  id: "smartptr", title: "ownership & smart pointers", widgetLabel: "control block",
+  src: ["effective modern c++ · items 18–22", "the c++ standard library · smart pointers", "boost c++ libraries · ch 3", "modern c++ design · ch 7"],
+  hook: "you used `make_shared`. the object's destructor ran an hour ago. **its memory is still allocated.** what's holding it?",
+  beats: [
+    { t: "p", h: "ownership is a design question first: **unique_ptr** = exactly one owner, zero overhead (same size as a raw pointer with a stateless deleter), move-only. **shared_ptr** = shared ownership via a heap-allocated *control block* holding a strong count, a weak count, the deleter, and the allocator. **weak_ptr** = observes without owning; can ask 'still alive?'." },
+    { t: "w", id: "sptr" },
+    { t: "p", h: "`make_shared` puts the object inside the control block: one allocation instead of two, better locality. the price: the object's bytes can't be returned until the *weak* count also drops to zero, because the control block lives that long. big objects + long-lived weak_ptrs → use `shared_ptr<T>(new T)` instead." },
+    {
+      t: "q", code: C`auto* raw = new Widget;
+std::shared_ptr<Widget> a(raw);
+std::shared_ptr<Widget> b(raw);`, q: "what happens?", o: ["a and b share; count = 2", "double delete when both go out of scope (UB)", "compile error", "b throws"], a: 1,
+      why: "each construction from a raw pointer creates a NEW control block. two blocks, each with count 1, each will delete raw. the same trap exists for `shared_ptr<T>(this)` inside a member — that's what enable_shared_from_this solves."
+    },
+    {
+      t: "q", code: C`struct Node {
+  std::shared_ptr<Node> next;
+  std::shared_ptr<Node> prev;
+};
+{
+  auto a = std::make_shared<Node>();
+  auto b = std::make_shared<Node>();
+  a->next = b; b->prev = a;
+}`, q: "after the block, how many Node destructors have run?", o: ["2", "1", "0 — both leak", "UB"], a: 2,
+      why: "a's count: local + b->prev = 2. scope exit → 1. same for b. neither hits zero; a cycle of strong refs is a leak. make back-pointers weak_ptr (or raw, if the lifetime is guaranteed by structure)."
+    },
+    {
+      t: "q", q: "`sizeof(std::unique_ptr<int>)` vs `sizeof(std::unique_ptr<FILE, int(*)(FILE*)>)` on 64-bit?", o: ["8, 8", "8, 16", "16, 16", "8, 24"], a: 1,
+      why: "a function-pointer deleter is state → stored → 16. a stateless lambda or empty functor deleter costs 0 thanks to EBO: `unique_ptr<FILE, decltype([](FILE* f){ fclose(f); })>` is 8 bytes (c++20 lambda in unevaluated context)."
+    },
+    { t: "edge", h: "shared_ptr's refcount is atomic, so copying one across threads is safe. the *pointee* is not protected at all, and the shared_ptr *object itself* is not safe to read+write from two threads (use `std::atomic<std::shared_ptr<T>>` in c++20). also: passing shared_ptr by value into every function costs two atomic RMWs per call. pass `T&` or `T*` unless the callee takes ownership." },
+    { t: "rule", h: "default to unique_ptr. it converts to shared_ptr for free later; the reverse is impossible. parameters: `T&` if you just use it, `unique_ptr<T>` by value if you take it, `shared_ptr<T>` by value only if you share it." },
+    { t: "recall", q: "with make_shared, when is the destructor called and when is memory freed? why are they different?", a: "dtor runs when strong count hits 0. memory freed when weak count also hits 0, because object and control block share one allocation and weak_ptrs need the control block to answer lock()." },
+  ],
+  cards: [
+    ["what's in a shared_ptr control block?", "strong count, weak count, deleter, allocator (and with make_shared, the object itself)."],
+    ["make_shared advantage and drawback?", "one allocation, better locality; but object memory isn't freed until all weak_ptrs are gone."],
+    ["why is constructing two shared_ptrs from one raw pointer fatal?", "two independent control blocks → each deletes the object → double delete."],
+    ["how do you break a shared_ptr cycle?", "make one direction weak_ptr (or a raw non-owning pointer)."],
+    ["is shared_ptr thread-safe?", "the refcount is atomic. the pointee isn't protected; concurrent read/write of the same shared_ptr object needs atomic<shared_ptr>."],
+    ["when is unique_ptr bigger than a raw pointer?", "when the deleter has state (e.g. function pointer). stateless deleters cost 0 via EBO."],
+  ]
+});
+
+lesson({
+  id: "lambda", title: "lambdas & closures", widgetLabel: "desugarer",
+  src: ["effective modern c++ · items 31–34", "c++ high performance · ch 2 lambdas", "boost c++ libraries · ch 7 higher order programming"],
+  hook: "a lambda is the most-used c++11 feature and the one people can least explain. **it's a class. what are its members, and when are they filled in?**",
+  beats: [
+    { t: "p", h: "the compiler turns each lambda expression into a unique unnamed class (the *closure type*) with an `operator()`, and the expression creates an instance (the *closure*). captures become data members, initialized **when the lambda expression is evaluated**. the body becomes `operator() const` — unless `mutable`." },
+    { t: "w", id: "lambda" },
+    {
+      t: "q", code: C`int x = 1;
+auto byval = [x] { return x; };
+auto byref = [&x] { return x; };
+x = 10;
+std::cout << byval() << byref();`, q: "output?", o: ["`1010`", "`110`", "`11`", "`101`"], a: 1,
+      why: "byval copied x=1 at creation. byref reads through a reference at call time → 10."
+    },
+    {
+      t: "q", code: C`auto counter = [n = 0]() mutable { return ++n; };
+auto c2 = counter;
+counter(); counter();
+std::cout << counter() << c2();`, q: "output?", o: ["`31`", "`34`", "`11`", "`33`"], a: 0,
+      why: "the counter state is a data member of the closure object. c2 is a *copy* made when n was 0. calling counter thrice → 3. c2's first call → 1. this is how std::function / algorithms copying your functor silently lose state."
+    },
+    {
+      t: "q", code: C`int g = 1;          // namespace scope (global)
+int main() {
+  auto f = [=] { return g; };
+  g = 2;
+  std::cout << f();
+}`, q: "`[=]` copies everything it uses… right? output?", o: ["`1`", "`2`", "compile error: g can't be captured", "UB"], a: 1,
+      why: "only automatic (non-static local) variables are captured. globals, namespace-scope and static locals are referenced directly — [=] silently doesn't copy them. it *looks* self-contained and isn't. one more reason to avoid default capture modes."
+    },
+    { t: "edge", h: "`[=]` inside a member function captured `this` (a pointer), not the members. store that lambda in a callback queue, destroy the object, and the closure dereferences freed memory. c++20 deprecates implicit `this` capture via `[=]`. write `[this]` (explicitly dangerous) or `[*this]` / `[n = n]` (explicitly safe)." },
+    { t: "rule", h: "prefer lambdas over `std::bind` — readable, inlinable, and the arguments are evaluated when you think they are. use explicit captures for anything that outlives the current scope." },
+    { t: "recall", q: "desugar `[&a, b = std::move(v)](int k) mutable { … }` into a class.", a: "class C { A& a; V b; public: C(A& a, V&& v) : a(a), b(std::move(v)) {} auto operator()(int k) /*non-const due to mutable*/ { … } }; instance created at the lambda expression." },
+  ],
+  cards: [
+    ["what is a closure type?", "the unique unnamed class the compiler generates for a lambda; captures are its data members, the body its operator()."],
+    ["when are by-value captures copied?", "when the lambda expression is evaluated (closure creation), not when it's called."],
+    ["what does `mutable` do?", "makes operator() non-const so by-value captures can be modified; the state persists in that closure object."],
+    ["are static locals captured by [=]?", "no — only automatic variables are captured; statics/globals are referenced directly."],
+    ["what does [=] capture in a member function?", "the this pointer (deprecated implicitly in c++20) — members are accessed through it, not copied."],
+    ["how do you move a unique_ptr into a lambda?", "c++14 init capture: [p = std::move(p)]."],
+  ]
+});
+
+/* ================= TRACK C: LIBRARY & PERFORMANCE ================= */
+track({ id: "03 // library & perf", title: "library & the machine", desc: "containers as contracts, the memory hierarchy as the real cost model, and algorithms over hand-rolled loops." });
+
+lesson({
+  id: "containers", title: "containers as contracts", widgetLabel: "invalidation lab",
+  src: ["the c++ standard library · stl containers, iterators", "c++ high performance · ch 4–5", "boost c++ libraries · ch 5–6"],
+  hook: "your code erased an element inside a loop and worked for two years. then someone changed `std::list` to `std::vector` for performance. **what did they actually change?**",
+  beats: [
+    { t: "p", h: "a container isn't just a complexity table — it's a **contract** about which iterators, pointers and references stay valid after each operation. `vector` buys contiguity (cache-friendly, fastest to iterate) by moving elements around. node-based containers (`list`, `map`, `set`) never move an element once placed, so handles stay valid — and every traversal is a pointer chase." },
+    { t: "w", id: "invalid" },
+    {
+      t: "q", code: C`std::vector<int> v{1, 2, 2, 3};
+for (auto it = v.begin(); it != v.end(); ++it)
+  if (*it == 2) v.erase(it);`, q: "what happens?", o: ["v = {1, 3}", "v = {1, 2, 3}", "undefined behavior", "infinite loop"], a: 2,
+      why: "erase invalidates `it`; `++it` on an invalidated iterator is UB. (in practice you'd often see {1,2,3} because the second 2 shifts into the slot you skip — UB that 'works'.) correct: `it = v.erase(it)` without ++ in that branch, or just `std::erase(v, 2)` in c++20."
+    },
+    {
+      t: "q", code: C`std::vector<int> v{3, 1, 3, 2, 3};
+auto e = std::remove(v.begin(), v.end(), 3);
+std::cout << v.size();`, q: "output?", o: ["2", "5", "3", "0"], a: 1,
+      why: "algorithms operate on iterators; they cannot change a container's size. remove shuffles the kept elements to the front and returns the new logical end. the tail holds unspecified values. you need `v.erase(e, v.end())` — the erase-remove idiom."
+    },
+    {
+      t: "q", code: C`std::map<std::string, int> m;
+if (m["alice"] == 0) { /* ... */ }
+std::cout << m.size();`, q: "output?", o: ["0", "1", "exception", "compile error"], a: 1,
+      why: "operator[] inserts a value-initialized element if the key is missing. a *lookup* that grows the map — and won't compile on a const map. use `find`, `contains` (c++20), or `at` (throws)."
+    },
+    { t: "edge", h: "`unordered_map` rehashing invalidates **iterators** but not **pointers/references** to elements (nodes don't move; buckets do). `std::deque::push_back` is the reverse trap: iterators die, references live. read the per-operation guarantees, not the container name." },
+    { t: "rule", h: "default to `std::vector`. switch only with a measured reason. `std::list` wins only when you hold long-lived iterators/pointers and splice/insert in the middle constantly — rarer than you think, because a cache miss costs ~100× a contiguous step." },
+    { t: "recall", q: "for std::vector: which operations invalidate which iterators?", a: "reallocation (push_back/insert at capacity, reserve above capacity, shrink_to_fit) → all. insert without realloc → at/after the insertion point. erase → at/after the erase point. end() is invalidated by any size change." },
+  ],
+  cards: [
+    ["when does push_back invalidate every iterator of a vector?", "when size() == capacity() → reallocation. otherwise only end()."],
+    ["what does std::remove actually do?", "moves kept elements forward, returns new logical end; size unchanged. follow with erase."],
+    ["side effect of map::operator[] on a missing key?", "inserts a value-initialized element."],
+    ["deque::push_back invalidates…?", "all iterators, but no references/pointers to elements."],
+    ["unordered_map rehash invalidates…?", "iterators, not references/pointers to elements."],
+  ]
+});
+
+lesson({
+  id: "cache", title: "the memory hierarchy", widgetLabel: "cache lines",
+  src: ["c++ high performance · ch 3 measuring, ch 4 data structures, ch 7 memory", "c++ concurrency in action · ch 8.2–8.3"],
+  hook: "two loops over the same 1 GB of data, same instruction count. one runs **10× slower**. no algorithmic difference. **what does big-O not see?**",
+  beats: [
+    { t: "p", h: "big-O counts operations. the hardware charges for **data movement**. rough orders of magnitude on a modern x86: L1 hit ~1 ns, L2 ~4 ns, L3 ~10–40 ns, DRAM ~80–100 ns. memory moves in 64-byte **cache lines**. and the prefetcher rewards predictable, sequential access while punishing pointer-chasing." },
+    { t: "p", h: "so the question for a hot loop is: **of each 64-byte line I pay for, how many bytes do I use?**" },
+    { t: "w", id: "cache" },
+    { t: "code", c: C`// row-major 2d traversal: the classic
+for (int i = 0; i < N; ++i)
+  for (int j = 0; j < N; ++j)
+    sum += m[i][j];      // sequential: 1 miss per 16 ints
+
+for (int j = 0; j < N; ++j)
+  for (int i = 0; i < N; ++i)
+    sum += m[i][j];      // stride N*4 bytes: potentially 1 miss per int`, cap: "same O(n²). not the same program." },
+    {
+      t: "q", q: "summing 10M ints: `std::vector<int>` vs `std::list<int>`. same O(n). realistic ratio?", o: ["about equal", "list ~2× slower", "list often 10×+ slower", "list faster (no reallocation)"], a: 2,
+      why: "vector: contiguous, prefetched, vectorizable (SIMD adds 8 ints per instruction). list: one dependent load per node, nodes scattered by the allocator → cache miss chain, no SIMD. plus each node is 24 bytes of overhead for 4 bytes of data."
+    },
+    {
+      t: "q", q: "a hot `struct Order` has 6 fields the matching loop reads and 20 it never touches. best first move?", o: ["make the loop parallel", "split hot fields into their own array/struct (hot/cold splitting)", "mark the struct alignas(64)", "use a linked list"], a: 1,
+      why: "hot/cold splitting raises bytes-used-per-line. alignas(64) just adds padding. parallelism on a memory-bound loop often gets nothing — the cores share the same memory bandwidth."
+    },
+    { t: "edge", h: "measure, don't reason. compilers vectorize, prefetchers detect strides, and turbo clocks lie. use a real benchmark harness (google benchmark), `perf stat -e cache-misses`, and look at the asm. the high-performance book's mantra: know your hot spots before you touch anything." },
+    { t: "recall", q: "why can SoA beat AoS, and when doesn't it?", a: "SoA packs one field contiguously, so a loop touching few fields uses every byte of each fetched line (and vectorizes). when the loop touches most/all fields of each element, AoS has equal or better locality (one stream vs many)." },
+  ],
+  cards: [
+    ["what unit does the cpu move memory in?", "cache lines — 64 bytes on mainstream x86/arm."],
+    ["rough latency: L1 vs DRAM?", "~1 ns vs ~100 ns — two orders of magnitude."],
+    ["why is std::list slow to traverse even though it's O(n)?", "each step is a dependent load from a scattered address → cache misses, no prefetching, no SIMD."],
+    ["AoS vs SoA: when does SoA win?", "when hot loops touch a few fields of many elements."],
+    ["what is hot/cold splitting?", "moving rarely-used fields out of a hot struct so each cache line carries more useful data."],
+  ]
+});
+
+lesson({
+  id: "alloc", title: "allocation is the hidden cost", widgetLabel: "sso",
+  src: ["c++ high performance · ch 7 memory management", "modern c++ design · ch 4 small-object allocation", "the c++ standard library · strings, allocators"],
+  hook: "your profiler says 30% of time is in `malloc`. you never call `malloc`. **who does, and how do you make them stop?**",
+  beats: [
+    { t: "p", h: "every `std::string` over a few chars, every `vector` growth, every `make_shared`, every `std::function` holding a big lambda — each is a general-purpose heap allocation: a lock or thread-cache lookup, size-class bookkeeping, and a fresh cache line you've never touched. the cheapest allocation is the one you don't make." },
+    { t: "p", h: "**small buffer optimization**: store small payloads inside the object itself. `std::string` does it (SSO), `std::function` does it for small callables, and so does any good `small_vector`." },
+    { t: "w", id: "sso" },
+    { t: "p", h: "when you *must* allocate, change the allocator. alexandrescu's small-object allocator (modern c++ design ch. 4) pooled fixed-size chunks to beat the general heap; today's standard answer is `std::pmr`: polymorphic memory resources, swappable at runtime without changing the container's type." },
+    { t: "code", c: C`#include <memory_resource>
+char buf[64 * 1024];
+std::pmr::monotonic_buffer_resource arena{buf, sizeof buf};
+std::pmr::vector<std::pmr::string> names{&arena};   // strings inherit the arena too
+for (auto& n : input) names.emplace_back(n);       // bump-pointer allocation
+// all freed at once when arena dies — individual deallocate() is a no-op` },
+    {
+      t: "q", code: C`std::vector<std::string> v;
+for (int i = 0; i < 1000; ++i)
+  v.push_back("item-" + std::to_string(i));`, q: "approximately how many heap allocations (libstdc++)?", o: ["~1000", "~11 (vector growth only — every string fits SSO)", "~2000", "~3000"], a: 1,
+      why: "\"item-999\" is 8 chars ≤ 15 → SSO, so strings don't allocate. vector grows 1,2,4,…,1024 → 11 allocations. call `reserve(1000)` → 1. change to a 20-char prefix and you add 1000 more."
+    },
+    {
+      t: "q", q: "stack vs heap allocation: why is the stack nearly free?", o: ["stack memory is faster RAM", "allocation is a pointer bump of the stack register, release is implicit at scope exit, and the top of stack is almost always hot in cache", "the OS pre-zeroes it", "it isn't — same cost"], a: 1,
+      why: "one `sub rsp, N` for the whole frame, no bookkeeping, no fragmentation, and you're writing to memory you just used. the limits: size (default 1–8 MB per thread) and lifetime (scope-bound)."
+    },
+    { t: "edge", h: "SSO makes moves *more* expensive for short strings: a moved-from short string must copy its inline bytes (there's no pointer to steal). 'moves are O(1)' is true; 'moves are free' is not." },
+    { t: "recall", q: "name three standard-library operations that allocate implicitly, and a mitigation for each.", a: "vector growth → reserve. long string building → reserve / string_view / SSO-sized keys. std::function with a large capture → smaller capture, template parameter, or function_ref. make_shared/new in loops → object pool or pmr arena." },
+  ],
+  cards: [
+    ["what is SSO?", "small string optimization: short strings are stored in the string object's own bytes, no heap allocation."],
+    ["inline capacity of std::string on libstdc++ / libc++ / msvc (64-bit)?", "15 / 22 / 15 chars."],
+    ["what is std::pmr::monotonic_buffer_resource?", "a bump allocator over a buffer; deallocation is a no-op; everything is released when the resource dies."],
+    ["why is stack allocation nearly free?", "a single stack-pointer adjustment per frame, implicit release, and hot cache lines."],
+    ["is moving a short std::string free?", "no — with SSO the inline bytes must be copied."],
+  ]
+});
+
+lesson({
+  id: "algos", title: "algorithms over loops",
+  src: ["the c++ standard library · stl algorithms", "c++ high performance · ch 5–6 iterators, algorithms & ranges"],
+  hook: "sean parent's challenge: *no raw loops*. sounds like dogma. **here's the version that isn't: a named algorithm states its complexity and its contract, and your loop doesn't.**",
+  beats: [
+    { t: "p", h: "the stl separates *data* (containers), *traversal* (iterators), and *operations* (algorithms). an algorithm is written once against an iterator category, so it works on everything that models it — and its complexity is guaranteed by the standard. knowing ~20 of them by heart is a superpower." },
+    { t: "ul", items: ["`partition` / `stable_partition` — split by predicate, O(n)", "`nth_element` — put the k-th element in place, smaller before, larger after, average O(n) — medians, top-k", "`partial_sort` — sort only the first k, O(n log k)", "`lower_bound` / `upper_bound` / `equal_range` — binary search on *sorted* ranges", "`rotate` — the secret engine behind 'move this block over there' (slide, gather)", "`unique` — remove *adjacent* duplicates (sort first)", "`transform_reduce` — map-reduce, parallelizable"] },
+    {
+      t: "q", q: "you need the median of 10M unsorted doubles, once. best tool?", o: ["std::sort then index n/2 — O(n log n)", "std::nth_element at n/2 — average O(n)", "std::partial_sort to n/2", "a std::multiset"], a: 1,
+      why: "nth_element does exactly the work needed and no more (introselect). sorting does log n times more work to produce an ordering you throw away."
+    },
+    {
+      t: "q", q: "you want the 10 largest of 10M items, in order.", o: ["sort descending, take 10", "partial_sort with greater<> on the first 10 — O(n log 10)", "nth_element only", "priority_queue of all 10M"], a: 1,
+      why: "partial_sort keeps a heap of k; ~n·log k comparisons. (nth_element + sort of the top 10 also works, and is often faster in practice. both beat a full sort.)"
+    },
+    {
+      t: "q", code: C`std::list<int> l = /* 1M sorted ints */;
+auto it = std::lower_bound(l.begin(), l.end(), 42);`, q: "complexity?", o: ["O(log n) — it's binary search", "O(log n) comparisons but O(n) iterator steps", "doesn't compile", "O(n log n)"], a: 1,
+      why: "lower_bound works on forward iterators: it does log n comparisons but must *walk* to each midpoint with ++ — linear total. the algorithm's guarantees are stated in terms of the iterator category you give it."
+    },
+    {
+      t: "q", code: C`std::vector<int> v{3, 1, 3, 1, 2};
+v.erase(std::unique(v.begin(), v.end()), v.end());
+// v is now?`, q: "result?", o: ["{1, 2, 3}", "{3, 1, 3, 1, 2}", "{3, 1, 2}", "{1, 3}"], a: 1,
+      why: "unique only collapses ADJACENT equal elements. none are adjacent here, so nothing changes. sort first if you want set semantics."
+    },
+    { t: "edge", h: "`std::sort` requires random-access iterators — it won't compile on `std::list` (use `l.sort()`). `std::sort` isn't stable; `std::stable_sort` may allocate. and comparators must be a *strict weak ordering*: `<=` as a comparator is UB and can crash introsort by running past the array." },
+    { t: "recall", q: "why is `[](int a, int b){ return a <= b; }` an invalid sort comparator?", a: "it's not irreflexive: comp(a,a) is true. strict weak ordering requires comp(a,a) == false. sort implementations rely on it (e.g. unguarded partition loops) and can read out of bounds." },
+  ],
+  cards: [
+    ["algorithm to find the median in average O(n)?", "std::nth_element."],
+    ["top-k sorted, cheaply?", "std::partial_sort (O(n log k)), or nth_element + sort the k."],
+    ["complexity of lower_bound on a std::list?", "O(log n) comparisons, O(n) iterator increments."],
+    ["what does std::unique remove?", "only consecutive duplicates; returns new logical end."],
+    ["requirements on a sort comparator?", "strict weak ordering: irreflexive, transitive, transitive incomparability. `<=` breaks it → UB."],
+  ]
+});
+
+/* ================= TRACK D: COMPILE TIME ================= */
+track({ id: "04 // compile time", title: "compile-time programming", desc: "templates as a pure functional language, traits & constraints, policy-based design, and making the compiler do your work." });
+
+lesson({
+  id: "tmp", title: "templates are a language", widgetLabel: "memoization",
+  src: ["c++ template metaprogramming (abrahams & gurtovoy) · ch 1–2, app. b", "advanced c++ metaprogramming (di gennaro) · ch 1, 3", "c++ high performance · ch 8"],
+  hook: "the c++ template system is turing-complete by accident. **what are its values, its functions, its `if`, and its loops?**",
+  beats: [
+    { t: "p", h: "map it to a functional language: **values** are types and compile-time constants. **functions** (metafunctions) are class templates; you 'call' one by instantiating it and read the result from a nested `::type` or `::value`. **`if`** is specialization (pattern matching). **loops** are recursion terminated by a specialization. nothing mutates." },
+    { t: "w", id: "fib" },
+    { t: "p", h: "since c++11/14/17, most numeric metaprogramming should be `constexpr` functions instead — normal syntax, loops, locals. type-level computation (choosing types, transforming types) still needs templates. c++20 `consteval` forces compile-time evaluation." },
+    { t: "code", c: C`constexpr unsigned long long fib(unsigned n) {
+  unsigned long long a = 0, b = 1;
+  for (unsigned i = 0; i < n; ++i) { auto t = a + b; a = b; b = t; }
+  return a;
+}
+static_assert(fib(50) == 12586269025ULL);   // proven at compile time` },
+    {
+      t: "q", code: C`template<class T>
+void f(const T& c) {
+  T::const_iterator* p;
+}`, q: "how does the compiler parse line 3 (before knowing T)?", o: ["declares a pointer p", "as `T::const_iterator` multiplied by `p` — an expression", "it waits until T is known", "syntax error"], a: 1,
+      why: "inside a template, a dependent qualified name is assumed to be a *value* unless you say `typename`. so this is a multiplication. write `typename T::const_iterator* p;`. similarly `t.template get<0>()` when calling a member template on a dependent object."
+    },
+    {
+      t: "q", code: C`template<int N> struct F { static const int v = N * F<N-1>::v; };
+template<> struct F<0> { static const int v = 1; };
+int a[F<5>::v];`, q: "size of a?", o: ["5", "120", "compile error: not a constant", "15"], a: 1,
+      why: "5·4·3·2·1·F<0>(1) = 120, computed during compilation. the specialization F<0> is the base case — forget it and instantiation recurses until the compiler's depth limit (~900–1024) gives up."
+    },
+    { t: "edge", h: "every distinct instantiation is a new type, new symbols, new code. `std::vector<int>` and `std::vector<long>` duplicate all machine code. heavy metaprogramming costs compile time and binary size (template metaprogramming appendix C measures this) — that's the trade for zero runtime cost." },
+    { t: "recall", q: "map these to template-metaprogramming equivalents: function, function call, return value, if, loop.", a: "function → class template (metafunction). call → instantiation. return → nested ::type / ::value. if → (partial) specialization or std::conditional. loop → recursion with a terminating specialization (or pack expansion)." },
+  ],
+  cards: [
+    ["what is a metafunction?", "a class template whose instantiation 'returns' a type (::type) or value (::value)."],
+    ["why `typename` before T::iterator?", "dependent names are assumed to be values; typename tells the parser it's a type."],
+    ["when do you need `.template`?", "calling a member template on a dependent object: t.template get<0>()."],
+    ["why is template recursion memoized?", "each specialization is instantiated once per translation unit, then reused."],
+    ["constexpr function vs template metaprogram for numbers?", "prefer constexpr: normal syntax, loops, faster to compile. templates are for type computation."],
+  ]
+});
+
+lesson({
+  id: "traits", title: "traits, sfinae & concepts",
+  src: ["c++ template metaprogramming · ch 2 traits", "advanced c++ metaprogramming · ch 4 overload resolution", "effective modern c++ · item 27", "c++ high performance · ch 8 type traits"],
+  hook: "you want `print(x)` to call `.size()` if it exists, and do something else otherwise. **how do you branch on a property of a type that might not even compile?**",
+  beats: [
+    { t: "p", h: "**type traits** are metafunctions that inspect or transform types: `is_integral<T>`, `remove_reference_t<T>`, `decay_t<T>`. they're how generic code asks questions. the trick that makes *conditional* code possible is **SFINAE**: substitution failure is not an error. if plugging T into a function template's signature produces invalid code, that overload is silently dropped." },
+    { t: "code", c: C`// c++11 sfinae: the overload exists only if t.size() is valid
+template<class T>
+auto len(const T& t) -> decltype(t.size()) { return t.size(); }
+std::size_t len(...) { return 0; }
+
+// c++17: if constexpr discards the untaken branch
+template<class T> auto len2(const T& t) {
+  if constexpr (requires { t.size(); }) return t.size();   // (c++20 requires-expr)
+  else return std::size_t{0};
+}
+
+// c++20: concepts name the requirement
+template<class T> concept Sized = requires(const T& t) { t.size(); };
+std::size_t len3(const Sized auto& t) { return t.size(); }` },
+    {
+      t: "q", code: C`template<class T> auto len(const T& t) {
+  if (std::is_integral_v<T>) return 1;
+  else return t.size();
+}
+len(5);`, q: "what happens?", o: ["returns 1", "compile error", "returns 0", "UB"], a: 1,
+      why: "a plain `if` compiles both branches for T=int. `t.size()` on an int is ill-formed → hard error (not SFINAE — we're in the body). and the two returns deduce different types. `if constexpr` discards the untaken branch for that instantiation."
+    },
+    {
+      t: "q", code: C`static_assert(std::is_same_v<std::remove_const_t<const int*>, int*>);`, q: "does it pass?", o: ["yes", "no"], a: 1,
+      why: "`const int*` is a non-const pointer to const int. the const is low-level; remove_const strips only top-level const (it would turn `int* const` into `int*`). result: `const int*`. traits are precise; your intuition is not."
+    },
+    {
+      t: "q", code: C`void f(int);  void f(long);  void f(double);
+f('a'); f(1u);`, q: "which overloads are selected?", o: ["f(int), f(long)", "f(int), then ambiguous for 1u", "f(double), f(double)", "f(int), f(int)"], a: 1,
+      why: "'a' → int is a *promotion* (better than conversion). unsigned → int, → long, → double are all *conversions* of the same rank → ambiguous. overload resolution ranks: exact > promotion > conversion > user-defined > ellipsis. sfinae and tag dispatch lean on these ranks."
+    },
+    {
+      t: "q", code: C`template<class T> concept Small = sizeof(T) <= 8;
+void g(Small auto x) { std::cout << "small"; }
+void g(auto x)       { std::cout << "any";   }
+g(1); g(std::string{});`, q: "output (64-bit libstdc++)?", o: ["`smallany`", "`anyany`", "ambiguous", "`smallsmall`"], a: 0,
+      why: "both are viable for int; the constrained one is *more specialized* (subsumption) so it wins. std::string is 32 bytes → only the unconstrained one is viable."
+    },
+    { t: "edge", h: "sfinae only applies in the *immediate context* — the declaration's signature. if substitution succeeds there but the body fails, you get a hard error deep inside the template. the metaprogramming books dedicate a whole chapter to deciphering those 'error novels'; concepts exist largely to move failures to the call site." },
+    { t: "rule", h: "c++20: concepts. c++17: `if constexpr` + `std::void_t`/`enable_if`. c++11: `enable_if` / expression sfinae / tag dispatch. reach for the newest you're allowed." },
+    { t: "recall", q: "what is SFINAE and where exactly does it apply?", a: "substitution failure is not an error: when substituting deduced template arguments into a function template's declaration (return type, params, template params, default args) yields invalid types/expressions, the candidate is removed from the overload set instead of erroring. it applies only in that immediate context, not inside the body." },
+  ],
+  cards: [
+    ["what does SFINAE stand for and mean?", "substitution failure is not an error — invalid substitution in a template's signature removes that overload instead of erroring."],
+    ["difference between if and if constexpr in a template?", "if constexpr discards the untaken branch at instantiation, so it needn't compile for that T."],
+    ["what does remove_const do to `const int*`?", "nothing — that const is low-level. it strips top-level only."],
+    ["overload resolution ranking?", "exact match > promotion > standard conversion > user-defined conversion > ellipsis."],
+    ["how does a concept-constrained overload win against an unconstrained one?", "partial ordering by constraints (subsumption): the more constrained is more specialized."],
+  ]
+});
+
+lesson({
+  id: "policy", title: "policy-based design", widgetLabel: "policy mixer",
+  src: ["modern c++ design · ch 1 policies, ch 3 typelists, ch 6 singletons, ch 7 smart pointers", "advanced c++ metaprogramming · ch 5 interfaces"],
+  hook: "one smart-pointer class. ownership, null-checking and threading each have 3–4 sane choices. **writing every combination is 24 classes. alexandrescu's answer was 1.**",
+  beats: [
+    { t: "p", h: "**policy-based design**: decompose a class into orthogonal design decisions, make each one a template parameter (a *policy*) with a small implied interface, and let the host class inherit from them. the compiler assembles exactly the class you asked for. the standard library does this too: `std::vector<T, Allocator>`, `std::unique_ptr<T, Deleter>`, `std::basic_string<C, Traits, Alloc>`." },
+    { t: "w", id: "policy" },
+    { t: "p", h: "why *inherit* from policies? (1) empty base optimization: a stateless policy costs zero bytes. (2) a policy can *add* member functions to the host's interface — enriched interfaces. (3) it's all resolved statically: no virtual calls, fully inlinable." },
+    { t: "p", h: "the same book introduced **typelists** — compile-time lists of types built with recursive templates, used to generate class hierarchies (abstract factories, visitors). c++11 variadic templates replaced the machinery but not the idea: `std::tuple<Ts...>` and `std::variant<Ts...>` are typelists with storage." },
+    { t: "code", c: C`template<class... Ts> struct TypeList {};
+template<class L> struct Length;
+template<class... Ts> struct Length<TypeList<Ts...>> : std::integral_constant<std::size_t, sizeof...(Ts)> {};
+static_assert(Length<TypeList<int, char, double>>::value == 3);` },
+    {
+      t: "q", q: "why do policy classes typically have a *protected non-virtual* destructor?", o: ["to make them abstract", "so nobody can delete a host through a policy pointer (which would be UB without a virtual dtor), while keeping the policy free of vptr cost", "required by the standard", "for EBO"], a: 1,
+      why: "the host publicly inheriting from a policy makes Host* → Policy* convertible. a virtual dtor would add a vptr to a 'zero-cost' class. protected means `delete policy_ptr` doesn't compile — problem solved statically."
+    },
+    {
+      t: "q", code: C`Widget& instance() {
+  static Widget w;   // 'meyers singleton'
+  return w;
+}`, q: "is the initialization of `w` thread-safe in c++11 and later?", o: ["no, needs double-checked locking", "yes — function-local static initialization is guaranteed thread-safe ('magic statics')", "only with -pthread", "only if Widget is trivially constructible"], a: 1,
+      why: "c++11 guarantees concurrent first calls wait for one initialization. modern c++ design's long singleton chapter (dead-reference problem, phoenix singleton, lifetime policies) predates this — the *destruction order* problems it discusses still exist."
+    },
+    { t: "edge", h: "policies multiply instantiations: `SmartPtr<W, RefCounted, AssertCheck>` and `SmartPtr<W, RefCounted, NoCheck>` are unrelated types — no implicit conversion between them unless you write converting constructors. that's the type-system cost of static configurability (it's why `std::pmr` exists: one container type, runtime-chosen allocator)." },
+    { t: "recall", q: "give the three reasons policy classes are inherited rather than held as members.", a: "empty base optimization (zero size for stateless policies); policies can add to the host's public interface; everything is statically bound and inlinable." },
+  ],
+  cards: [
+    ["what is a policy (alexandrescu)?", "a class/template implementing one orthogonal design decision with an implied interface, passed as a template parameter to a host class."],
+    ["standard-library examples of policy-based design?", "allocators (vector<T, A>), deleters (unique_ptr<T, D>), char_traits (basic_string)."],
+    ["why protected non-virtual destructors on policies?", "prevents deletion via a policy pointer without adding a vptr."],
+    ["are function-local statics thread-safe to initialize?", "yes, since c++11 ('magic statics')."],
+    ["modern replacement for loki typelists?", "variadic packs: template<class... Ts>; tuple/variant are typelists with storage."],
+  ]
+});
+
+lesson({
+  id: "crtp", title: "crtp & expression templates", widgetLabel: "lazy evaluation",
+  src: ["c++ template metaprogramming · ch 9.8 crtp, ch 10 dsels", "c++ high performance · ch 9 proxy objects & lazy evaluation", "advanced c++ metaprogramming · ch 7–8"],
+  hook: "`Vec r = a + b + c + d;` — with ordinary operator overloading, this makes three temporary vectors and walks memory four times. **with the right return type, it walks memory once and makes none.**",
+  beats: [
+    { t: "p", h: "**crtp** (curiously recurring template pattern): `struct Derived : Base<Derived>`. the base knows the derived type at compile time, so it can call derived functions via `static_cast<Derived&>(*this)` — polymorphism with no vptr and full inlining. it's how you write mixins and static interfaces." },
+    { t: "code", c: C`template<class D> struct Comparable {
+  friend bool operator!=(const D& a, const D& b) { return !(a == b); }
+  friend bool operator> (const D& a, const D& b) { return b < a; }
+};
+struct Money : Comparable<Money> {
+  long cents;
+  friend bool operator==(const Money& a, const Money& b) { return a.cents == b.cents; }
+  friend bool operator< (const Money& a, const Money& b) { return a.cents <  b.cents; }
+};   // Money gets != and > for free, sizeof(Money) == 8` },
+    { t: "p", h: "**expression templates**: instead of computing, `operator+` returns a lightweight object that *describes* the computation — its type encodes the whole expression tree. assignment walks the tree once per element. this is how eigen and blaze beat naive c++ — and the same lazy-proxy idea powers ranges views." },
+    { t: "w", id: "expr" },
+    {
+      t: "q", code: C`template<class D> struct Shape {
+  double area() const { return static_cast<const D&>(*this).area_impl(); }
+};
+struct Square : Shape<Square> { double s; double area_impl() const { return s * s; } };
+struct Circle : Shape<Square> { double r; double area_impl() const { return 3.14 * r * r; } };`, q: "what's wrong, and what catches it?", o: ["nothing", "Circle derives from Shape<Square> (copy-paste bug); area() casts a Circle to Square — UB; nothing catches it by default", "compile error on Circle", "infinite recursion"], a: 1,
+      why: "the classic crtp bug. guard: give Shape a private constructor and `friend D;` — then only D can construct Shape<D>, and Circle : Shape<Square> fails to compile."
+    },
+    {
+      t: "q", code: C`auto e = a + b;    // a, b: expression-template vectors
+a[0] = 100;
+Vec r = e;`, q: "what is r[0]?", o: ["the original a[0] + b[0]", "100 + b[0]", "UB", "compile error"], a: 1,
+      why: "`auto` captured the lazy expression node (holding references to a and b), not a result. evaluation happens at `Vec r = e` — after a changed. and if a or b die first, e dangles. lazy evaluation + auto = the vector<bool> proxy problem again."
+    },
+    { t: "edge", h: "deducing `this` (c++23: `void f(this auto& self)`) gives most of crtp's static dispatch without the template-base boilerplate or the wrong-base bug. crtp remains everywhere in existing code (`std::enable_shared_from_this<T>` is crtp)." },
+    { t: "recall", q: "what does an expression template's operator+ return, and why does that eliminate temporaries?", a: "a small node object (e.g. Sum<L, R>) holding references to its operands and computing element i on demand. the full expression's type is a tree; assignment loops once, evaluating the tree per element, so no intermediate vectors are allocated or traversed." },
+  ],
+  cards: [
+    ["what is CRTP?", "Derived inherits Base<Derived>; the base static_casts this to Derived to call its members — static polymorphism."],
+    ["how to prevent the 'wrong base' CRTP bug?", "private Base constructor + friend D; only D can construct Base<D>."],
+    ["what does an expression template operator+ return?", "an expression node type describing the operation, evaluated lazily on assignment."],
+    ["danger of `auto` with expression templates?", "it captures the unevaluated node holding references — stale or dangling results."],
+    ["standard-library type that uses CRTP?", "std::enable_shared_from_this<T>."],
+  ]
+});
+
+/* ================= TRACK E: CONCURRENCY ================= */
+track({ id: "05 // concurrency", title: "concurrency", desc: "threads, locks, waiting, the memory model, and lock-free code — with you as the scheduler." });
+
+lesson({
+  id: "races", title: "threads & data races", widgetLabel: "scheduler sim",
+  src: ["c++ concurrency in action · ch 1–3", "effective modern c++ · items 35, 37", "boost c++ libraries · ch 10"],
+  hook: "`counter++` from two threads, a million times each. the answer is not two million. **it's not even consistently wrong.** why does one line of c++ break?",
+  beats: [
+    { t: "p", h: "`counter++` is three machine-level steps: load into a register, add, store back. if two threads interleave those steps, one increment overwrites the other. the c++ standard goes further: two unsynchronized accesses to the same memory location, at least one a write, is a **data race**, and a data race is **undefined behavior** — the compiler may assume it never happens (and e.g. keep counter in a register for the whole loop)." },
+    { t: "w", id: "threads", cfg: { scenario: "race" } },
+    { t: "p", h: "two fixes with different costs: a **mutex** makes the read-modify-write a critical section (blocking, works for any amount of code). an **atomic** makes a single operation indivisible in hardware (`lock xadd` on x86) — no blocking, but only for that one operation." },
+    {
+      t: "q", code: C`void work();
+int main() {
+  std::thread t(work);
+}   // t goes out of scope here`, q: "what happens at the closing brace?", o: ["main waits for work() to finish", "the thread is detached automatically", "std::terminate is called", "nothing"], a: 2,
+      why: "destroying a std::thread that is still *joinable* (not joined, not detached) calls std::terminate. the committee refused both implicit join (hidden hangs) and implicit detach (hidden dangling). c++20 std::jthread joins in its destructor."
+    },
+    {
+      t: "q", code: C`void inc(int& x) { ++x; }
+int main() {
+  int n = 0;
+  std::thread t(inc, n);
+  t.join();
+}`, q: "what happens?", o: ["n == 1", "n == 0", "compile error", "UB"], a: 2,
+      why: "std::thread copies (decays) its arguments into internal storage and passes them as rvalues. an rvalue int can't bind to int&. pass `std::ref(n)` — and then *you* own the lifetime problem."
+    },
+    {
+      t: "q", code: C`bool done = false;     // plain bool
+// thread A:
+while (!done) { }
+// thread B:
+done = true;`, q: "with optimization on, thread A…", o: ["exits shortly after B writes", "may spin forever: data race → UB; the compiler can hoist the load out of the loop", "exits immediately", "crashes"], a: 1,
+      why: "no synchronization means the compiler may assume `done` doesn't change inside the loop and read it once. `volatile` is NOT the fix in c++ (it doesn't order or synchronize). `std::atomic<bool>` is."
+    },
+    { t: "edge", h: "passing a pointer/reference to a local into a thread that you then `detach()` — the function returns, the local dies, the thread reads garbage. detach is almost always the wrong tool; if you must, pass everything by value." },
+    { t: "rule", h: "every shared mutable variable is either (a) protected by one specific mutex, documented next to it, or (b) atomic. there is no (c)." },
+    { t: "recall", q: "define a data race precisely, and what the standard says about it.", a: "two accesses to the same memory location from different threads, at least one a write, at least one non-atomic, not ordered by happens-before. the program then has undefined behavior." },
+  ],
+  cards: [
+    ["what is a data race in c++?", "conflicting accesses (≥1 write, ≥1 non-atomic) to the same location from different threads without happens-before ordering → UB."],
+    ["what happens if a joinable std::thread is destroyed?", "std::terminate. (std::jthread joins instead.)"],
+    ["how does std::thread pass arguments?", "decay-copies them; passes as rvalues. use std::ref for references."],
+    ["is volatile useful for thread communication in c++?", "no. it neither makes ops atomic nor orders them. use std::atomic."],
+    ["mutex vs atomic?", "mutex: blocking critical section for arbitrary code. atomic: indivisible single operation, lock-free on typical hardware for word-sized types."],
+  ]
+});
+
+lesson({
+  id: "deadlock", title: "locks & deadlock", widgetLabel: "deadlock sim",
+  src: ["c++ concurrency in action · ch 3.2", "c++ high performance · ch 10"],
+  hook: "both threads are correct in isolation. together, sometimes, the process freezes — no crash, no log, 0% cpu. **what four conditions just aligned?**",
+  beats: [
+    { t: "p", h: "deadlock needs: mutual exclusion, hold-and-wait, no preemption, and a **circular wait**. you can't easily remove the first three with mutexes, so you break the cycle: either every thread acquires locks in **one global order**, or acquires all of them **atomically** (`std::scoped_lock(a, b)` uses a deadlock-avoidance algorithm: try, back off, retry)." },
+    { t: "w", id: "threads", cfg: { scenario: "deadlock" } },
+    { t: "code", c: C`void transfer(Account& from, Account& to, int amt) {
+  std::scoped_lock lk(from.m, to.m);    // order-independent, no deadlock
+  from.bal -= amt; to.bal += amt;
+}
+// transfer(a, b) and transfer(b, a) concurrently: safe.
+// with lock_guard(from.m); lock_guard(to.m); — the classic deadlock.` },
+    {
+      t: "q", code: C`std::mutex m;
+void g() { std::lock_guard<std::mutex> lk(m); /* ... */ }
+void f() { std::lock_guard<std::mutex> lk(m); g(); }`, q: "calling f()?", o: ["works; same thread owns m", "undefined behavior (in practice: self-deadlock)", "throws", "compile error"], a: 1,
+      why: "locking a std::mutex you already own is UB. std::recursive_mutex allows it — but usually needing it means your locking granularity is wrong (split into a locked public function + unlocked private impl)."
+    },
+    {
+      t: "q", q: "you hold a lock and call a user-supplied callback. what's the risk?", o: ["none", "the callback may try to take the same or another lock → deadlock or lock-order inversion; or block for arbitrarily long", "only performance", "the callback can't see the data"], a: 1,
+      why: "never call unknown code while holding a lock. copy what you need, release, then call. concurrency in action calls this out explicitly in its lock-design guidelines."
+    },
+    {
+      t: "q", q: "`std::lock_guard` vs `std::unique_lock`?", o: ["identical", "unique_lock can unlock/relock, defer, try, time out, and be moved — needed for condition_variable::wait; lock_guard is the minimal scoped lock", "lock_guard is faster at runtime by a lot", "unique_lock is for shared_mutex only"], a: 1,
+      why: "unique_lock carries an 'owns' flag so it can be unlocked early and moved. condition_variable::wait needs to unlock and re-lock, so it requires unique_lock."
+    },
+    { t: "edge", h: "returning a reference or pointer to protected data out of the locked region defeats the mutex entirely: `T& get() { lock_guard l(m); return data; }` — the caller uses `data` unlocked. the protection is on code paths, not on the data." },
+    { t: "recall", q: "name the four deadlock conditions and two standard ways to break the cycle.", a: "mutual exclusion, hold-and-wait, no preemption, circular wait. break circular wait by (1) a global lock ordering (or lock hierarchy), (2) acquiring all locks at once with std::lock / std::scoped_lock. (also: try_lock with backoff, or redesign to need one lock.)" },
+  ],
+  cards: [
+    ["four conditions for deadlock?", "mutual exclusion, hold-and-wait, no preemption, circular wait."],
+    ["how does std::scoped_lock(a, b) avoid deadlock?", "it uses std::lock's deadlock-avoidance algorithm (lock one, try the rest, back off on failure) regardless of argument order."],
+    ["locking a std::mutex twice from the same thread?", "UB (typically self-deadlock)."],
+    ["why does condition_variable::wait need unique_lock?", "it must unlock while waiting and relock on wake; lock_guard can't."],
+    ["rule about callbacks and locks?", "never call unknown code while holding a lock."],
+  ]
+});
+
+lesson({
+  id: "waiting", title: "waiting: condvars & futures",
+  src: ["c++ concurrency in action · ch 4", "effective modern c++ · items 35–39"],
+  hook: "the consumer calls `cv.wait(lk)`. the producer calls `notify_one()`. **the consumer sleeps forever.** the code looks textbook. what's missing?",
+  beats: [
+    { t: "p", h: "a condition variable is not a flag. it has no memory: a notify with nobody waiting is lost. so the *state* must live in a variable protected by the mutex, and the waiter must re-check it. waits can also wake **spuriously** — without any notify. both problems have one fix: always wait with a predicate." },
+    { t: "code", c: C`std::mutex m; std::condition_variable cv; std::queue<Job> q;
+
+void producer(Job j) {
+  { std::lock_guard lk(m); q.push(std::move(j)); }   // change state under the lock
+  cv.notify_one();                                     // then notify
+}
+Job consumer() {
+  std::unique_lock lk(m);
+  cv.wait(lk, [&] { return !q.empty(); });   // == while(!pred()) cv.wait(lk);
+  Job j = std::move(q.front()); q.pop();
+  return j;
+}` },
+    {
+      t: "q", q: "the producer notifies *before* the consumer reaches `cv.wait(lk)` (no predicate). result?", o: ["the wait returns immediately", "the notification is lost; consumer may wait forever", "UB", "exception"], a: 1,
+      why: "condition variables don't latch. with the predicate form, the consumer checks `!q.empty()` under the lock first, sees the item, and never sleeps."
+    },
+    { t: "p", h: "for one-shot results, **futures** are simpler: `std::promise` / `std::packaged_task` / `std::async` produce a `std::future<T>`, and `get()` blocks until the value (or an exception!) arrives. exceptions thrown in the task are rethrown from `get()`." },
+    {
+      t: "q", code: C`std::async(std::launch::async, slow_task);   // 1 s
+std::async(std::launch::async, slow_task);   // 1 s
+// how long until we get here?`, q: "≈ how long?", o: ["~1 s (parallel)", "~2 s — they run one after another", "~0 s", "unbounded"], a: 1,
+      why: "the returned std::future is a temporary destroyed at the end of each statement, and the *last* future referring to an async-launched shared state BLOCKS in its destructor until the task finishes. fire-and-forget with std::async isn't."
+    },
+    {
+      t: "q", q: "`auto f = std::async(task);` with the default policy. guaranteed to run on another thread?", o: ["yes", "no — default is async|deferred; it may run lazily on the thread that calls get()/wait(), or never if nobody does", "only if hardware_concurrency() > 1", "it never runs concurrently"], a: 1,
+      why: "deferred execution also means thread_local variables and `wait_for` timeouts behave differently (wait_for returns future_status::deferred — a timeout loop on it spins forever). pass std::launch::async when you mean it."
+    },
+    { t: "edge", h: "notify while holding the lock or after releasing it? both are correct with predicate waits. notifying after unlock avoids waking a thread that immediately blocks on the mutex — but if the condvar might be destroyed right after the state change (the waiter returns and frees it), notify under the lock." },
+    { t: "recall", q: "why must condition-variable waits use a predicate loop?", a: "spurious wakeups can return from wait without a notify, and a notify sent before the wait is lost. checking shared state (protected by the mutex) before and after each wait handles both." },
+  ],
+  cards: [
+    ["what is a spurious wakeup?", "a condition-variable wait returning without a notify. always wait in a predicate loop."],
+    ["does a condition variable remember a notify with no waiters?", "no — it's lost. the state must live in a mutex-protected variable."],
+    ["why do two discarded std::async(launch::async, …) calls run sequentially?", "the temporary future's destructor blocks until its async task completes."],
+    ["default std::async launch policy?", "async | deferred — it may run lazily on get()/wait(), or never."],
+    ["what happens to an exception thrown inside a std::async task?", "it's stored in the shared state and rethrown by future::get()."],
+  ]
+});
+
+lesson({
+  id: "memmodel", title: "the memory model & atomics", widgetLabel: "litmus tests",
+  src: ["c++ concurrency in action · ch 5", "c++ high performance · ch 10 lock-free", "effective modern c++ · item 40"],
+  hook: "thread 1 writes `x = 1` then reads `y`. thread 2 writes `y = 1` then reads `x`. **both read 0.** no interleaving of four instructions produces that. your cpu does it anyway.",
+  beats: [
+    { t: "p", h: "compilers reorder independent instructions, and cpus have store buffers, caches and speculative loads. so 'program order' is not what other threads observe. the c++ memory model defines what *is* guaranteed via **happens-before**: if A happens-before B, B sees A's effects. you create that edge with mutexes, or with atomics using the right **memory order**." },
+    { t: "w", id: "litmus" },
+    { t: "ul", items: ["`memory_order_seq_cst` (default): all seq_cst ops appear in one global order consistent with program order. easiest to reason about; costs a full fence on stores on x86.", "`release` (store) / `acquire` (load): if an acquire load reads a release store, everything before the release happens-before everything after the acquire. this is the publish/subscribe pattern and it covers most needs.", "`relaxed`: atomicity only — no ordering with other variables. fine for counters/statistics, nothing else."] },
+    {
+      t: "q", code: C`std::atomic<int> n{0};
+// 8 threads, each: for (1M) n++;`, q: "final value of n?", o: ["exactly 8,000,000", "≤ 8,000,000, varies", "UB", "8,000,000 only with seq_cst"], a: 0,
+      why: "`n++` on an atomic is a single atomic read-modify-write (fetch_add). no lost updates under ANY memory order, even relaxed — ordering is about *other* variables, not this one's atomicity. (it'll be slow: every increment bounces the cache line between cores.)"
+    },
+    {
+      t: "q", code: C`std::atomic<bool> ready{false}; int data = 0;
+// T1:
+data = 42; ready.store(true, std::memory_order_relaxed);
+// T2:
+while (!ready.load(std::memory_order_relaxed)) {}
+std::cout << data;`, q: "what is this program?", o: ["prints 42 always", "prints 42 or 0", "has a data race on `data` → UB", "deadlocks"], a: 2,
+      why: "relaxed creates no happens-before, so the non-atomic accesses to `data` race → UB, not merely 'might print 0'. change to store(release) / load(acquire) and it's correct and prints 42."
+    },
+    {
+      t: "q", q: "`compare_exchange_weak` may fail even when the value equals `expected`. why does it exist?", o: ["it's deprecated", "on ll/sc architectures (arm, power) a strong CAS needs an internal retry loop; weak exposes the spurious failure so your *own* loop handles it — cheaper inside a loop", "it's faster on x86", "for relaxed ordering only"], a: 1,
+      why: "use weak inside a retry loop (you loop anyway), strong when a single attempt's result matters. on x86 both compile to `lock cmpxchg`."
+    },
+    { t: "edge", h: "x86 is 'TSO': it only reorders a store with a *later* load (exactly the store-buffering test). so acquire/release are free on x86 and relaxed bugs hide there. arm and power reorder much more. code tested only on x86 is not tested." },
+    { t: "rule", h: "use seq_cst until a profiler says otherwise; then acquire/release for publish/subscribe; relaxed only for isolated counters. if you can't draw the happens-before edges, use a mutex." },
+    { t: "recall", q: "what does a release store paired with an acquire load guarantee?", a: "if the acquire load reads the value written by the release store (they synchronize-with), every write sequenced before the release in the writer happens-before every read after the acquire in the reader — the reader sees all of it." },
+  ],
+  cards: [
+    ["what does happens-before give you?", "if A happens-before B, B observes A's effects. created by synchronization (mutex, release/acquire, seq_cst)."],
+    ["release/acquire in one sentence?", "an acquire load that reads a release store makes everything before the store visible after the load."],
+    ["can relaxed atomic increments lose updates?", "no — atomicity of RMW holds at every memory order. ordering is about other variables."],
+    ["compare_exchange_weak vs strong?", "weak may fail spuriously (cheaper on LL/SC); use it in loops. strong only fails if values differ."],
+    ["what reordering does x86 allow?", "store followed by a load to a different address (store buffering). nothing else among normal ops."],
+    ["why is the store-buffering outcome (0,0) forbidden under seq_cst?", "seq_cst imposes a single total order; whichever store is first must be visible to the other thread's subsequent load."],
+  ]
+});
+
+lesson({
+  id: "lockfree", title: "lock-free & parallel algorithms", widgetLabel: "amdahl",
+  src: ["c++ concurrency in action · ch 7–8, 10", "c++ high performance · ch 10–11 concurrency, parallel stl"],
+  hook: "you parallelized a loop across 32 cores and got **3×**. then you removed one shared counter and got 20×. **where did the other 29 cores go?**",
+  beats: [
+    { t: "p", h: "the ceiling on parallel speedup is the serial fraction (amdahl). but in practice the bigger killers are hidden serialization: a shared lock, a shared atomic counter, a shared allocator, or **false sharing** — independent variables that happen to sit on the same cache line, which the coherence protocol bounces between cores as if they were one." },
+    { t: "w", id: "amdahl" },
+    { t: "code", c: C`struct Counters {                         // 8 threads, each bumps its own slot
+  std::atomic<long> c[8];                  // ✗ all 8 share one 64-byte line → ping-pong
+};
+struct alignas(64) Padded { std::atomic<long> v; };
+struct Counters2 { Padded c[8]; };          // ✓ one line per thread
+// c++17: std::hardware_destructive_interference_size instead of 64` },
+    {
+      t: "q", code: C`template<class T> struct Stack {
+  struct Node { T v; Node* next; };
+  std::atomic<Node*> head;
+  void push(T v) {
+    Node* n = new Node{v, head.load()};
+    while (!head.compare_exchange_weak(n->next, n)) {}
+  }
+};`, q: "is this push correct?", o: ["no — n->next is stale after a failure", "yes — on failure compare_exchange_weak writes the current head into n->next, so the loop retries with fresh data", "no — needs a mutex", "only with seq_cst explicitly"], a: 1,
+      why: "the `expected` argument is updated on failure. that's the canonical lock-free push. the hard part is *pop*: reading head->next after another thread popped and freed head (use-after-free), and ABA. that's why concurrency in action spends chapters on hazard pointers and reference counting."
+    },
+    {
+      t: "q", q: "the ABA problem is…", o: ["two threads both writing A", "a CAS succeeds because the value is A again — but in between it changed to B and back (e.g. a node freed and its address reused), so the assumptions behind the CAS are stale", "a deadlock between atomics", "an x86-only bug"], a: 1,
+      why: "CAS compares bits, not history. fixes: tagged pointers / version counters (double-width CAS), hazard pointers, epoch-based reclamation, or never reusing memory while readers may hold it."
+    },
+    {
+      t: "q", code: C`std::vector<int> v = /* 100M */;
+std::mutex m; long sum = 0;
+std::for_each(std::execution::par_unseq, v.begin(), v.end(),
+  [&](int x) { std::lock_guard l(m); sum += x; });`, q: "what's wrong?", o: ["just slow", "UB: par_unseq allows interleaving iterations on one thread (vectorization), so taking a mutex can deadlock; and it serializes anyway", "nothing", "compile error"], a: 1,
+      why: "par_unseq element functions must not synchronize (no locks, no allocation). and summing under a lock is a serial program with extra steps. use `std::reduce(std::execution::par_unseq, v.begin(), v.end(), 0L)`."
+    },
+    { t: "edge", h: "if an element function throws under any execution policy, `std::terminate` is called — the exception does not propagate. and the parallel algorithms need a backend (with gcc: link TBB, `-ltbb`) or they silently run sequentially." },
+    { t: "rule", h: "lock-free is not a performance feature by default — it's a progress guarantee. the fastest concurrent code shares nothing: partition the data, give each thread its own accumulator (padded), combine at the end." },
+    { t: "recall", q: "what is false sharing and how do you fix it?", a: "threads writing to distinct variables on the same cache line force the line to bounce between cores' caches under coherence, serializing them. fix by padding/aligning per-thread data to the destructive interference size (64B), or by using thread-local accumulators." },
+  ],
+  cards: [
+    ["amdahl's law?", "speedup = 1 / ((1−p) + p/n). serial fraction 1−p caps speedup at 1/(1−p)."],
+    ["what is false sharing?", "independent variables on one cache line written by different cores; coherence traffic serializes them."],
+    ["what is the ABA problem?", "CAS succeeds because the value returned to its old bits, though the state changed in between (e.g. freed + reused node)."],
+    ["what's forbidden inside par_unseq element functions?", "synchronization (locks, blocking) and anything vectorization-unsafe like allocation."],
+    ["what happens if a parallel algorithm's element function throws?", "std::terminate."],
+    ["what does compare_exchange do with `expected` on failure?", "writes the current value into it."],
+  ]
+});
+
+/* ================= TRACK F: ECOSYSTEM ================= */
+track({ id: "06 // ecosystem", title: "boost & the standard", desc: "where half the standard library came from, and the boost pieces that never made it in." });
+
+lesson({
+  id: "boost", title: "boost: the standard's proving ground",
+  src: ["boost c++ libraries (mukherjee) · ch 1–11", "the c++ standard library · utilities", "c++ high performance · ch 2 optional/any, ch 8 variant"],
+  hook: "`shared_ptr`, `regex`, `thread`, `chrono`, `optional`, `variant`, `any`, `filesystem` — **all of them shipped in boost first, often a decade earlier.** knowing which didn't make it is just as useful.",
+  beats: [
+    { t: "p", h: "boost is a peer-reviewed collection of libraries, many written by committee members as prototypes for standardization. the pipeline: boost → (tr1) → std. the std versions often *differ* in details — learning those differences is how you avoid porting bugs." },
+    { t: "ul", items: ["c++11 absorbed: smart pointers, function, bind, regex, thread, chrono, array, unordered containers, random, tuple, type_traits", "c++17 absorbed: optional, variant, any, filesystem, string_view (from boost::string_ref)", "never absorbed (still boost-only): multi_index, bimap, asio (networking), spirit, intrusive containers, flat_map (until c++23), program_options, serialization"] },
+    { t: "code", c: C`// boost.multi_index: one container, several indices over the same elements
+using namespace boost::multi_index;
+struct Emp { int id; std::string name; };
+using Emps = multi_index_container<Emp, indexed_by<
+  ordered_unique<member<Emp, int, &Emp::id>>,                 // lookup by id
+  hashed_non_unique<member<Emp, std::string, &Emp::name>>      // lookup by name
+>>;
+// vs. hand-syncing a map<int,Emp> and an unordered_multimap<string,int>` },
+    {
+      t: "q", code: C`std::variant<std::string, bool> v = "hello";
+std::cout << v.index();`, q: "output under c++17 as originally published (before the p0608 fix)?", o: ["0 (string)", "1 (bool)", "compile error", "ambiguous"], a: 1,
+      why: "\"hello\" is a const char*. pointer→bool is a *standard* conversion; const char*→std::string is *user-defined*. standard wins → bool. p0608 (c++20, applied by most implementations retroactively) excludes narrowing/bool conversions, giving index 0. this exact bug shipped in real code."
+    },
+    {
+      t: "q", q: "a `std::variant` can be 'valueless_by_exception'. boost::variant can't be empty. why the difference?", o: ["boost uses more memory: on a throwing assignment it can fall back to heap backup storage to keep the never-empty guarantee; std chose no hidden allocation and an observable valueless state", "std::variant is buggy", "boost doesn't support exceptions", "they're identical"], a: 0,
+      why: "classic design trade-off: strong invariant vs zero hidden cost. std went zero-cost. check `v.valueless_by_exception()` if your alternatives' constructors can throw."
+    },
+    {
+      t: "q", code: C`boost::asio::io_context io;
+// no work posted
+io.run();
+std::cout << "done";`, q: "what happens?", o: ["blocks forever waiting for work", "prints 'done' immediately — run() returns when there's no pending work", "throws", "UB"], a: 1,
+      why: "run() processes handlers until none remain. servers keep it alive with an `executor_work_guard` (or by always having a pending async_accept). asio's proactor model — post async ops, handlers run inside run() — is the backbone of most c++ networking; it never became `std::net`."
+    },
+    { t: "edge", h: "`std::optional<T&>` didn't exist until c++26; `boost::optional<T&>` has existed for ages with rebinding semantics. `std::thread` has no interruption (boost.thread has `interrupt()`); c++20's `std::jthread` + `stop_token` is the cooperative-cancellation answer. 'it's in std now' rarely means 'identical'." },
+    { t: "recall", q: "name three boost libraries that became std (with the standard version) and two that never did.", a: "e.g. shared_ptr (c++11), chrono (c++11), filesystem (c++17), optional/variant/any (c++17). never: asio, multi_index, bimap, spirit, serialization." },
+  ],
+  cards: [
+    ["which standard absorbed boost::filesystem, optional, variant, any?", "c++17."],
+    ["which standard absorbed boost smart pointers, regex, thread, chrono?", "c++11 (via tr1 for several)."],
+    ["what does boost.multi_index give you?", "one container with multiple simultaneous indices (ordered, hashed, sequenced…) over the same elements, kept in sync."],
+    ["std::variant vs boost::variant on throwing assignment?", "std can become valueless_by_exception; boost keeps never-empty via heap backup."],
+    ["when does asio's io_context::run() return?", "when there is no more pending work/handlers — use a work guard to keep it alive."],
+  ]
+});
+
+route();
+</script></body></html>
